@@ -1,0 +1,107 @@
+[
+  {
+    "id": "ORD-001",
+    "trackingId": "TRK-001",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "+2348000000001",
+    "address": "123 Main Street, Lagos",
+    "amount": 99.99,
+    "status": "paid",
+    "fulfillmentStatus": "delivered",
+    "tx_ref": "TX-ORD001",
+    "createdAt": "2024-10-01T10:00:00Z",
+    "items": [
+      {
+        "name": "Wireless Headphones",
+        "status": "Delivered",
+        "price": 99.99,
+        "imageUrl": "https://via.placeholder.com/100?text=Headphones"
+      }
+    ]
+  },
+  {
+    "id": "ORD-002",
+    "trackingId": "TRK-002",
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "phone": "+2348000000002",
+    "address": "456 Broad Avenue, Abuja",
+    "amount": 149.49,
+    "status": "paid",
+    "fulfillmentStatus": "processing",
+    "tx_ref": "TX-ORD002",
+    "createdAt": "2024-10-02T12:30:00Z",
+    "items": [
+      {
+        "name": "Smart Watch",
+        "status": "In Progress",
+        "price": 149.49,
+        "imageUrl": "https://via.placeholder.com/100?text=Watch"
+      }
+    ]
+  },
+  {
+    "id": "ORD-003",
+    "trackingId": "TRK-003",
+    "name": "David King",
+    "email": "david@example.com",
+    "phone": "+2348000000003",
+    "address": "789 King Way, Port Harcourt",
+    "amount": 39.99,
+    "status": "cancelled",
+    "fulfillmentStatus": "cancelled",
+    "tx_ref": "TX-ORD003",
+    "createdAt": "2024-10-03T14:45:00Z",
+    "items": [
+      {
+        "name": "Gaming Mouse",
+        "status": "Canceled",
+        "price": 39.99,
+        "imageUrl": "https://via.placeholder.com/100?text=Mouse"
+      }
+    ]
+  },
+  {
+    "id": "ORD-004",
+    "trackingId": "TRK-004",
+    "name": "Grace Ada",
+    "email": "grace@example.com",
+    "phone": "+2348000000004",
+    "address": "14 Grace Close, Enugu",
+    "amount": 299.00,
+    "status": "paid",
+    "fulfillmentStatus": "delivered",
+    "tx_ref": "TX-ORD004",
+    "createdAt": "2024-10-04T09:15:00Z",
+    "items": [
+      {
+        "name": "4K Monitor",
+        "status": "Delivered",
+        "price": 299.00,
+        "imageUrl": "https://via.placeholder.com/100?text=Monitor"
+      }
+    ]
+  },
+  {
+    "id": "ORD-005",
+    "trackingId": "TRK-005",
+    "name": "Emeka Obi",
+    "email": "emeka@example.com",
+    "phone": "+2348000000005",
+    "address": "25 Unity Road, Kano",
+    "amount": 89.95,
+    "status": "pending",
+    "fulfillmentStatus": "processing",
+    "tx_ref": "TX-ORD005",
+    "createdAt": "2024-10-05T17:20:00Z",
+    "items": [
+      {
+        "name": "Mechanical Keyboard",
+        "status": "In Progress",
+        "price": 89.95,
+        "imageUrl": "https://via.placeholder.com/100?text=Keyboard"
+      }
+    ]
+  }
+]

@@ -1,0 +1,48 @@
+[
+    {
+      "id": "ghT-06Qv-90V-004",
+      "name": "Fresh Fish",
+      "description": "Freshly caught fish.",
+      "image": "/assets/fish03.jpg",
+      "priceInKobo": 270000,
+      "quality": 1,
+      "category": "Seafood"
+    },
+    {
+      "id": "ghT-06Qv-90V-003",
+      "name": "6kg Spiced Crabs",
+      "description": "Delicious and spiced crabs.",
+      "image": "/assets/crab.jpg",
+      "priceInKobo": 600000,
+      "quality": 1,
+      "category": "Seafood"
+    },
+    {
+      "id": "ghT-06Qv-90V-002",
+      "name": "4kg Fresh Shrimps",
+      "description": "High-quality fresh shrimps.",
+      "image": "/assets/shrimp.jpg",
+      "priceInKobo": 350000,
+      "quality": 1,
+      "category": "Seafood"
+    },
+    {
+      "id": "ghT-06Qv-90V-001",
+      "name": "Basket of Tomatoes",
+      "description": "Organic and fresh tomatoes.",
+      "image": "/assets/tomato.jpg",
+      "priceInKobo": 250000,
+      "quality": 1,
+      "category": "Vegetables"
+    },
+    {
+      "id": "ghT-06Qv-90V-000",
+      "name": "2kg Red Beef",
+      "description": "Freshly cut premium red beef.",
+      "image": "/assets/meat2.png",
+      "priceInKobo": 300000,
+      "quality": 1,
+      "category": "Meat"
+    }
+  ]
+  

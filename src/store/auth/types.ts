@@ -1,0 +1,80 @@
+// types.ts
+
+export interface SignupPayload {
+  username: string;
+  email: string;
+  password: string;
+  recaptchaToken: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface VerifyEmailPayload {
+  emailToken: string;
+}
+
+
+export interface UpdateProfilePayload {
+  name?: string;
+  email?: string;
+  password?: string;
+  avatar?: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
+export interface AuthUser {
+  id: string;
+  username: string;
+  email: string;
+  phone?: string;
+  role: string;
+  authProvider?: string;
+  isGoogleUser?: boolean;
+  profilePic: string;
+}
+
+
+
+// 🔹 1. Slice for just state
+export interface AuthSlice {
+  authUser: AuthUser | null;
+  accessToken: string | null; // ✅ move this here
+  isCheckingAuth: boolean;
+  isLoading: boolean;
+  isSigningUp: boolean;
+  isLoggingIn: boolean;
+  isVerifyingEmail: boolean;
+  isUpdatingProfile: boolean;
+  isRequestingReset: boolean;
+  isResettingPassword: boolean;
+}
+
+// 🔹 2. Slice for just actions
+export interface AuthActions {
+  setAuthUser: (user: AuthUser | null) => void;
+  checkAuth: () => Promise<void>;
+  signup: (data: SignupPayload) => Promise<{ success: boolean; message: string }>;
+  login: (data: LoginPayload) => Promise<void>;
+  logout: ()=> Promise<void>;
+  fetchUser: () => Promise<void>;
+  verifyEmail: (data: VerifyEmailPayload) => Promise<boolean>;
+  updateProfile: (data: UpdateProfilePayload) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  resetPassword: (data: ResetPasswordPayload) => Promise<boolean>;
+  getAuthMethod: () => string;
+  getRole: () => string;
+  setAccessToken: (token: string | null) => void;
+  clearAccessToken: () => void;
+  refreshAccessToken: () => Promise<string>; // ✅ add this
+}
+
+
+// 🔹 3. Combine into the store type
+export type AuthState = AuthSlice & AuthActions;

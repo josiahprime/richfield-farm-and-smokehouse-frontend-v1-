@@ -1,8 +1,104 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Light mode colors */
+  --background: 0 0% 96%;
+  --foreground: 0 0% 15%;
+
+  --card: 0 0% 96%;
+  --card-foreground: 0 0% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 15%;
+
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 0 0% 92%;
+  --secondary-foreground: 0 0% 15%;
+
+  --muted: 0 0% 88%;
+  --muted-foreground: 0 0% 45%;
+
+  --accent: 210 100% 50%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 0 0% 90%;
+  --input: 0 0% 96%;
+  --ring: 210 100% 50%;
+
+  --radius: 0.75rem;
+
+  /* Neomorphic shadows */
+  --shadow-light: 255 255 255;
+  --shadow-dark: 209 213 219;
+  --neomorph-raised: 6px 6px 12px rgba(209, 213, 219, 0.4),
+    -6px -6px 12px rgba(255, 255, 255, 0.8);
+  --neomorph-pressed: inset 3px 3px 6px rgba(209, 213, 219, 0.4),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+  --neomorph-flat: 3px 3px 6px rgba(209, 213, 219, 0.3),
+    -3px -3px 6px rgba(255, 255, 255, 0.7);
+
+  /* Sidebar colors */
+  --sidebar-background: 0 0% 96%;
+  --sidebar-foreground: 0 0% 15%;
+  --sidebar-primary: 210 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 92%;
+  --sidebar-accent-foreground: 0 0% 15%;
+  --sidebar-border: 0 0% 90%;
+  --sidebar-ring: 210 100% 50%;
+}
+
+/* Dark Mode */
+.dark {
+  --background: 0 0% 10%;
+  --foreground: 0 0% 95%;
+
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 95%;
+
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 95%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 210 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 0 0% 18%;
+  --input: 0 0% 10%;
+  --ring: 210 100% 50%;
+
+  --shadow-light: 26 26 26;
+  --shadow-dark: 0 0 0;
+
+  --neomorph-raised: 6px 6px 12px rgba(0, 0, 0, 0.5),
+    -6px -6px 12px rgba(26, 26, 26, 0.2);
+  --neomorph-pressed: inset 3px 3px 6px rgba(0, 0, 0, 0.5),
+    inset -3px -3px 6px rgba(26, 26, 26, 0.2);
+  --neomorph-flat: 3px 3px 6px rgba(0, 0, 0, 0.4),
+    -3px -3px 6px rgba(26, 26, 26, 0.15);
+
+  --sidebar-background: 0 0% 10%;
+  --sidebar-foreground: 0 0% 95%;
+  --sidebar-primary: 210 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 0 0% 95%;
+  --sidebar-border: 0 0% 18%;
+  --sidebar-ring: 210 100% 50%;
 }
 
 @theme inline {
@@ -12,15 +108,106 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  /* Neomorphic effects */
+  .neomorph-raised {
+    box-shadow: var(--neomorph-raised);
+  }
+  .dark .neomorph-raised {
+    box-shadow: var(--neomorph-raised);
+  }
+
+  .neomorph-pressed {
+    box-shadow: var(--neomorph-pressed);
+  }
+
+  .neomorph-flat {
+    box-shadow: var(--neomorph-flat);
+  }
+
+  .neomorph-hover:hover {
+    box-shadow: 4px 4px 8px rgba(209, 213, 219, 0.35),
+      -4px -4px 8px rgba(255, 255, 255, 0.75);
+  }
+  .dark .neomorph-hover:hover {
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.45),
+      -4px -4px 8px rgba(26, 26, 26, 0.18);
+  }
+
+  .neomorph-active:active {
+    box-shadow: var(--neomorph-pressed);
+    transform: scale(0.98);
+  }
+
+  /* Centering */
+  .flex-center {
+    @apply flex justify-center items-center;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col justify-center items-center;
+  }
+
+  /* Custom Shadow */
+  .custom-shadow {
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1),
+      -2px -2px 8px rgba(255, 255, 255, 0.7);
+  }
+
+  /* Input Floating Label Styles */
+  .inputBox {
+    @apply relative w-[300px];
+  }
+
+  .inputBox-input {
+    @apply w-full p-[10px] outline-none text-black rounded-md duration-500 bg-white shadow;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1),
+      -2px -2px 8px rgba(255, 255, 255, 0.7);
+  }
+
+  .inputBox-span {
+    @apply absolute left-0 p-[10px] pointer-events-none text-[1em] text-black/30 capitalize duration-500;
+  }
+
+  .inputBox-input:focus ~ .inputBox-span,
+  .inputBox-input:valid ~ .inputBox-span {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 3px;
+    color: white;
+    transform: translateX(10px) translateY(-7px);
+    font-size: 0.8rem;
+    padding: 0 10px;
+    /* border: 1px solid rgba(0, 0, 0, 0.3); */
+    letter-spacing: 0.2em;
+  }
+
+  .inputBox-input:focus,
+  .inputBox-input:valid {
+    /* border: 1px solid rgba(0, 0, 0, 0.3); */
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  
 }

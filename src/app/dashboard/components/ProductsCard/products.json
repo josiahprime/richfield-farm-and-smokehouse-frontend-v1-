@@ -1,0 +1,147 @@
+
+
+[
+    {
+      "id": 1,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/carrots.png",
+      "title": "Fresh Carrots",
+      "price": 5,
+      "description": "Organic and freshly harvested carrots perfect for your meals.",
+      "stock": 10
+    },
+    {
+      "id": 2,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/eggs-1.png",
+      "title": "Eggs",
+      "price": 12,
+      "description": "A dozen eggs from free-range chickens.",
+      "stock": 10
+    },
+    {
+      "id": 3,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/honey-1.png",
+      "title": "Golden Honey",
+      "price": 8,
+      "description": "Raw and unfiltered honey straight from the hive.",
+      "stock": 10
+    },
+    {
+      "id": 4,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/milk-1.png",
+      "title": "Fresh Milk",
+      "price": 4,
+      "description": "Creamy, farm-fresh milk with no additives.",
+      "stock": 7
+    },
+    {
+      "id": 5,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/tomato.jpg",
+      "title": "Farm Fresh Tomatoes",
+      "price": 6,
+      "description": "Ripe and juicy tomatoes, perfect for salads and cooking.",
+      "stock": 3
+    },
+    {
+      "id": 6,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/corn.png",
+      "title": "Sweet Corn",
+      "price": 7,
+      "description": "Freshly picked sweet corn, great for grilling.",
+      "stock": 9
+    },
+    {
+      "id": 7,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/orange.png",
+      "title": "Red Apples",
+      "price": 10,
+      "description": "Crisp and sweet apples, straight from the orchard.",
+      "stock": 2
+    },
+    {
+      "id": 8,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/fish00.jpg",
+      "title": "Fresh Lettuce",
+      "price": 3,
+      "description": "Crisp and refreshing lettuce for salads and wraps.",
+      "stock": 5
+    },
+    {
+      "id": 9,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/tomato.jpg",
+      "title": "Raw Almonds",
+      "price": 15,
+      "description": "Healthy and delicious almonds straight from the farm.",
+      "stock": 0
+    },
+    {
+      "id": 10,
+      "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+      "imageUrl": "/assets/shrimp.jpg",
+      "title": "Pumpkin",
+      "price": 9,
+      "description": "Fresh pumpkins, perfect for pies and decorations.",
+      "stock": 8
+    }
+  ]
+
+
+  

@@ -1,0 +1,344 @@
+[
+  {
+    "id": "ghT-06Qv-90V-000",
+    "name": "2kg Red Beef",
+    "description": "Tender and fresh red beef, sourced from high-quality farms, ideal for cooking hearty meals and stews.",
+    "category": "Meat",
+    "images": [
+      "/assets/meat.png",
+      "/assets/meat2.png",
+      "/assets/meat3.png",
+      "/assets/meat4.png"
+    ],
+    "priceInKobo": 320000,
+    "quantity": 1,
+    "stock": 50,
+    "rating": 4.5,
+    "reviewsCount": 20
+  },
+  {
+    "id": "ghT-06Qv-90V-001",
+    "name": "Tomatoes",
+    "description": "Juicy organic tomatoes, hand-picked, great for stews, salads, sauces, and various culinary delights.",
+    "category": "Vegetables",
+    "images": [
+      "/assets/tomato.jpg",
+      "/assets/tomato2.png",
+      "/assets/tomato3.png",
+      "/assets/tomato4.png"
+    ],
+    "priceInKobo": 260000,
+    "quantity": 1,
+    "stock": 100,
+    "rating": 5,
+    "reviewsCount": 15
+  },
+  {
+    "id": "ghT-06Qv-90V-002",
+    "name": "4kg Fresh Shrimps",
+    "description": "Premium quality shrimps, freshly caught and perfect for seafood dishes, stir-fries, and pasta recipes.",
+    "category": "Seafood",
+    "images": [
+      "/assets/shrimp.jpg",
+      "/assets/shrimp1.png",
+      "/assets/shrimp2.png",
+      "/assets/shrimp3.png"
+    ],
+    "priceInKobo": 370000,
+    "quantity": 1,
+    "stock": 30
+  },
+  {
+    "id": "ghT-06Qv-90V-003",
+    "name": "6kg Spiced Crabs",
+    "description": "Spiced and ready-to-cook crabs, freshly sourced, perfect for seafood lovers who enjoy rich flavors.",
+    "category": "Seafood",
+    "images": [
+      "/assets/crab.jpg",
+      "/assets/crab2.png",
+      "/assets/crab3.png",
+      "/assets/crab4.png"
+    ],
+    "priceInKobo": 610000,
+    "quantity": 1,
+    "stock": 25
+  },
+  {
+    "id": "ghT-06Qv-90V-004",
+    "name": "Fresh Fish",
+    "description": "Freshly caught fish, rich in omega-3 fatty acids, great for a healthy diet and delicious meal preparations.",
+    "category": "Seafood",
+    "images": [
+      "/assets/fish.png",
+      "/assets/fish1.jpg",
+      "/assets/fish2.jpg",
+      "/assets/fish3.jpg"
+    ],
+    "priceInKobo": 280000,
+    "quantity": 1,
+    "stock": 40
+  },
+  {
+    "id": "ghT-92Xy-38MZ-157",
+    "name": "Milk",
+    "description": "Rich and creamy milk, sourced from organic dairy farms, perfect for a nutritious diet, cereals, and beverages.",
+    "category": "Dairy",
+    "images": [
+      "/assets/milk-1.png",
+      "/assets/milk-2.png",
+      "/assets/milk-3.png",
+      "/assets/milk-4.png"
+    ],
+    "priceInKobo": 1500,
+    "quantity": 1,
+    "stock": 200
+  },
+  {
+    "id": "ghT-47Qv-82PL-904",
+    "name": "Orange Juice",
+    "description": "Freshly squeezed orange juice, made from ripe oranges, full of vitamin C, and perfect for a refreshing drink.",
+    "category": "Beverages",
+    "images": [
+      "/assets/orange-juice-1.png",
+      "/assets/orange-juice-2.png",
+      "/assets/orange-juice-3.png",
+      "/assets/orange-juice-4.png"
+    ],
+    "priceInKobo": 2000,
+    "quantity": 1,
+    "stock": 150
+  },
+  {
+    "id": "ghT-61Mn-74XK-325",
+    "name": "Apples",
+    "description": "Crisp and sweet apples, freshly harvested, great for snacks, juices, and various desserts.",
+    "category": "Fruits",
+    "images": [
+      "/assets/apples-1.png",
+      "/assets/apples-2.png",
+      "/assets/apples-3.png",
+      "/assets/apples-4.png"
+    ],
+    "priceInKobo": 3000,
+    "quantity": 1,
+    "stock": 120
+  },
+  {
+    "id": "ghT-83Zr-19TY-678",
+    "name": "Strawberries",
+    "description": "Fresh and juicy strawberries, hand-picked and perfect for desserts, smoothies, and fruit salads.",
+    "category": "Fruits",
+    "images": [
+      "/assets/strawberry-1.png",
+      "/assets/strawberry-2.png",
+      "/assets/strawberry-3.png",
+      "/assets/strawberry-4.png"
+    ],
+    "priceInKobo": 3500,
+    "quantity": 1,
+    "stock": 90
+  },
+  {
+    "id": "ghT-29Xc-56LM-410",
+    "name": "Cheese",
+    "description": "Rich and creamy cheese, aged to perfection, great for sandwiches, pasta, and gourmet dishes.",
+    "category": "Dairy",
+    "images": [
+      "/assets/cheese-1.png",
+      "/assets/cheese-2.png",
+      "/assets/cheese-3.png",
+      "/assets/cheese-4.png"
+    ],
+    "priceInKobo": 4500,
+    "quantity": 1,
+    "stock": 80
+  },
+
+
+
+  
+
+  {
+    "id": "ghT-42Yx-71JK-921",
+    "name": "Almonds",
+    "description": "Crunchy and delicious almonds, packed with protein, fiber, and healthy fats. A perfect snack for a healthy lifestyle and great for baking or adding to meals.",
+    "category": "Nuts",
+    "images": [
+      "/assets/almonds-1.png",
+      "/assets/almonds-2.png",
+      "/assets/almonds-3.png",
+      "/assets/almonds-4.png"
+    ],
+    "priceInKobo": 5200,
+    "quantity": 1,
+    "stock": 150
+  },
+  {
+    "id": "ghT-19Zt-98QP-572",
+    "name": "Bell Pepper",
+    "description": "Fresh, colorful bell peppers that add a crisp texture and sweet flavor to salads, stir-fries, and sauces. Loaded with vitamins and antioxidants.",
+    "category": "Vegetables",
+    "images": [
+      "/assets/bell-pepper-1.png",
+      "/assets/bell-pepper-2.png",
+      "/assets/bell-pepper-3.png",
+      "/assets/bell-pepper-4.png"
+    ],
+    "priceInKobo": 2500,
+    "quantity": 1,
+    "stock": 200
+  },
+  {
+    "id": "ghT-73Lu-29MK-684",
+    "name": "Broccoli",
+    "description": "Nutritious and fresh broccoli, rich in fiber and vitamins. Perfect for steaming, roasting, or stir-frying to create healthy and tasty dishes.",
+    "category": "Vegetables",
+    "images": [
+      "/assets/brocoli-1.png",
+      "/assets/brocoli-2.png",
+      "/assets/brocoli-3.png",
+      "/assets/brocoli-4.png"
+    ],
+    "priceInKobo": 2700,
+    "quantity": 1,
+    "stock": 180
+  },
+  {
+    "id": "ghT-36Vy-85NK-112",
+    "name": "Butter",
+    "description": "Smooth and creamy butter, made from high-quality dairy. Ideal for baking, spreading on toast, or enhancing the flavor of your favorite dishes.",
+    "category": "Dairy",
+    "images": [
+      "/assets/butter-1.png",
+      "/assets/butter-2.png",
+      "/assets/butter-3.png",
+      "/assets/butter-4.png"
+    ],
+    "priceInKobo": 4800,
+    "quantity": 1,
+    "stock": 120
+  },
+  {
+    "id": "ghT-64Yt-59QP-849",
+    "name": "Eggs",
+    "description": "Fresh, farm-raised eggs that are rich in protein and essential nutrients. Perfect for breakfast, baking, or cooking a variety of meals.",
+    "category": "Dairy",
+    "images": [
+      "/assets/eggs-1.png",
+      "/assets/eggs-2.png",
+      "/assets/eggs-3.png",
+      "/assets/eggs-4.png"
+    ],
+    "priceInKobo": 1500,
+    "quantity": 1,
+    "stock": 300
+  },
+  {
+    "id": "ghT-92Wz-65NJ-235",
+    "name": "Mango",
+    "description": "Sweet and juicy mangoes, packed with tropical flavor and nutrients. Great for smoothies, desserts, or simply enjoying fresh.",
+    "category": "Fruits",
+    "images": [
+      "/assets/mango-1.png",
+      "/assets/mango-2.png",
+      "/assets/mango-3.png",
+      "/assets/mango-4.png"
+    ],
+    "priceInKobo": 3200,
+    "quantity": 1,
+    "stock": 220
+  },
+  {
+    "id": "ghT-74Zk-81XL-562",
+    "name": "Pineapples",
+    "description": "Fresh and ripe pineapples, bursting with tropical sweetness and vitamin C. Excellent for juicing, fruit salads, or snacking.",
+    "category": "Fruits",
+    "images": [
+      "/assets/pineapples-1.png",
+      "/assets/pineapples-2.png",
+      "/assets/pineapples-3.png",
+      "/assets/pineapples-4.png"
+    ],
+    "priceInKobo": 3400,
+    "quantity": 1,
+    "stock": 170
+  },
+  {
+    "id": "ghT-19Qp-56LM-103",
+    "name": "Bread",
+    "description": "Soft, fresh bread baked to perfection. Ideal for sandwiches, toast, or serving as a side with your favorite meals.",
+    "category": "Bakery",
+    "images": [
+      "/assets/bread-1.png",
+      "/assets/bread-2.png",
+      "/assets/bread-3.png",
+      "/assets/bread-4.png"
+    ],
+    "priceInKobo": 2000,
+    "quantity": 1,
+    "stock": 250
+  },
+  {
+    "id": "ghT-26Xp-49JL-219",
+    "name": "Cabbage",
+    "description": "Crisp and fresh cabbage, rich in vitamins and fiber. Perfect for salads, stir-fries, or making delicious coleslaw.",
+    "category": "Vegetables",
+    "images": [
+      "/assets/cabbage-1.png",
+      "/assets/cabbage-2.png",
+      "/assets/cabbage-3.png",
+      "/assets/cabbage-4.png"
+    ],
+    "priceInKobo": 2500,
+    "quantity": 1,
+    "stock": 210
+  },
+  {
+    "id": "ghT-84Xc-73NK-456",
+    "name": "Chocolate",
+    "description": "Rich and creamy chocolate, made from the finest cocoa beans. A delightful treat for snacking, baking, or gifting.",
+    "category": "Confectionery",
+    "images": [
+      "/assets/chocolate-1.png",
+      "/assets/chocolate-2.png",
+      "/assets/chocolate-3.png",
+      "/assets/chocolate-4.png"
+    ],
+    "priceInKobo": 75000,
+    "quantity": 1,
+    "stock": 80
+  },
+  {
+    "id": "ghT-57Jt-29XP-762",
+    "name": "Cucumber",
+    "description": "Fresh and crunchy cucumbers, perfect for salads, sandwiches, or refreshing drinks. High in water content and great for hydration.",
+    "category": "Vegetables",
+    "images": [
+      "/assets/cucumber-1.png",
+      "/assets/cucumber-2.png",
+      "/assets/cucumber-3.png",
+      "/assets/cucumber-4.png"
+    ],
+    "priceInKobo": 52000,
+    "quantity": 1,
+    "stock": 190
+  },
+  {
+      "id": "ghT-57Jt-75XP-321",
+      "description": "Freshly picked sweet corn, great for grilling.",
+      "category": "Vegetables",
+      "images": [
+      "/assets/corn.png",
+      "/assets/corn1.png",
+      "/assets/corn2.png",
+      "/assets/corn3.png"
+      ],
+      "priceInKobo": 35000,
+      "stock": 9,
+      "rating": 4.5,
+      "reviewsCount": 20
+    }
+
+]
+  
+  
