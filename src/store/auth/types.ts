@@ -18,11 +18,9 @@ export interface VerifyEmailPayload {
 
 
 export interface UpdateProfilePayload {
-  name?: string;
-  email?: string;
-  password?: string;
-  avatar?: string;
+  profilePic: File; // the new image file to upload
 }
+
 
 export interface ResetPasswordPayload {
   token: string;
@@ -32,6 +30,7 @@ export interface ResetPasswordPayload {
 export interface AuthUser {
   id: string;
   username: string;
+  createdAt?: string;
   email: string;
   phone?: string;
   role: string;
@@ -61,7 +60,7 @@ export interface AuthActions {
   setAuthUser: (user: AuthUser | null) => void;
   checkAuth: () => Promise<void>;
   signup: (data: SignupPayload) => Promise<{ success: boolean; message: string }>;
-  login: (data: LoginPayload) => Promise<void>;
+  login: (data: LoginPayload) => Promise<boolean>;
   logout: ()=> Promise<void>;
   fetchUser: () => Promise<void>;
   verifyEmail: (data: VerifyEmailPayload) => Promise<boolean>;

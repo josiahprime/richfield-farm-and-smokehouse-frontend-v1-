@@ -3,6 +3,8 @@ import React, {useState} from "react";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { AiOutlineMail, AiOutlinePhone, AiOutlineEdit } from "react-icons/ai";
 import { useAuthStore } from "store/auth/useAuthStore";
+import { UserCircle } from "lucide-react";
+import Image from "next/image";
 
 const Profile = () => {
   const  authUser  = useAuthStore((state)=>(state.authUser));
@@ -41,15 +43,29 @@ const Profile = () => {
 
         {/* Profile Info */}
         <div className="mt-8 bg-white rounded-2xl shadow-md p-6 flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-10">
-          <img
-            src={authUser?.profilePic}
-            alt="Profile"
-            className="w-32 h-32 rounded-full shadow object-cover ring-2 ring-green-400"
-          />
+          {authUser?.profilePic ? (
+            <div className="relative w-32 h-32 ring-2 ring-green-400 rounded-full overflow-hidden shadow">
+              <Image
+                src={authUser.profilePic}
+                alt="Profile"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 128px, 128px"
+                priority
+              />
+            </div>
+          ) : (
+            <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center ring-2 ring-green-400 shadow">
+              <UserCircle className="w-16 h-16 text-gray-400" />
+            </div>
+          )}
+
           <div className="text-center md:text-left">
             <h2 className="text-2xl font-bold text-gray-800">{authUser?.username}</h2>
             <p className="text-gray-500 mt-1">Role: {authUser?.role}</p>
-            <p className="text-gray-500">Joined: {authUser?.createdAt}</p>
+            <p className="text-gray-500">
+              Joined: {authUser?.createdAt || "17/07/1999"}
+            </p>
             <div className="mt-4">
               <button className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                 <AiOutlineEdit />

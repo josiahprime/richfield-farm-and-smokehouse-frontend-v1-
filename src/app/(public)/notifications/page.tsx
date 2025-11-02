@@ -1,25 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, ButtonHTMLAttributes, ReactNode } from "react";
 import useNotificationsStore from "store/notification/useNotificationStore";
 import { useAuthStore } from "store/auth/useAuthStore";
 import { formatDistanceToNow } from "date-fns";
 import { FaBell, FaSlidersH, FaCog } from "react-icons/fa";
 
 // Button component
-const Button = ({ children, variant = "default", ...props }) => {
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: ReactNode;
+  variant?: "default" | "secondary" | "outline";
+};
+
+const Button = ({ children, variant = "default", ...props }: ButtonProps) => {
   const base = "inline-flex items-center px-4 py-2 rounded text-sm font-medium transition";
-  const variants = {
+
+  const variants: Record<"default" | "secondary" | "outline", string> = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
     secondary: "bg-gray-100 text-gray-800 hover:bg-gray-200",
     outline: "border border-gray-300 text-gray-800 hover:bg-gray-100",
   };
+
+  const variantClass = variants[variant]; // safe now because variant always has default
+
   return (
-    <button className={`${base} ${variants[variant]}`} {...props}>
+    <button className={`${base} ${variantClass}`} {...props}>
       {children}
     </button>
   );
 };
+
+
 
 // Input component
 const Input = ({ className = "", ...props }) => (
@@ -46,7 +57,7 @@ const NotificationsPage = () => {
     load();
     const cleanup = connectSocket(authUser.id);
     return () => cleanup();
-  }, [authUser]);
+  }, [authUser, fetchNotifications, connectSocket]);
 
   if (isLoading) {
     return (

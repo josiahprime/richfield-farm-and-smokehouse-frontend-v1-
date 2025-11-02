@@ -12,7 +12,7 @@ import { useAuthStore } from "store/auth/useAuthStore";
 
 // secret key: 
 const Signup = () => {
-  const recaptchaRef = useRef(null);
+  const recaptchaRef = useRef<ReCAPTCHA | null>(null);
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -36,9 +36,10 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log('login button clicked')
+    console.log(process.env.NEXT_PUBLIC_RECAPTCHA_FRONTEND_KEY);
     e.preventDefault();
 
-    let token = '';
+    let token: string | null = null;
     if (recaptchaRef.current) {
       console.log("✅ Executing reCAPTCHA...");
       token = await recaptchaRef.current.executeAsync();
@@ -64,7 +65,7 @@ const Signup = () => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      recaptchaToken: token, 
+       recaptchaToken: token ?? "",
     });
     
 
@@ -170,6 +171,7 @@ const Signup = () => {
               ref={recaptchaRef}
               sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_FRONTEND_KEY || ''}
               size="invisible"
+              className='right-20'
             />
           </div>
 
@@ -180,7 +182,7 @@ const Signup = () => {
           </div>
 
           <button className="w-full border py-3 rounded-md font-semibold flex items-center justify-center">
-            <Image src="/images/googleIcon.png" alt="Google logo" width={24} height={24} className="mr-2" />
+            <Image src="https://res.cloudinary.com/djmnjen6v/image/upload/v1762093061/googleIcon_ycpzgf.png" alt="Google logo" width={24} height={24} className="mr-2" />
             Sign up with Google
           </button>
 
@@ -198,10 +200,10 @@ const Signup = () => {
       </div>
 
       {/* Right Side */}
-      <div className="w-1/2 bg-cover bg-center" style={{ backgroundImage: "url(/images/logout.jpg)" }}>
+      <div className="w-1/2 bg-cover bg-center" style={{ backgroundImage: "url(https://res.cloudinary.com/djmnjen6v/image/upload/v1762093796/orange_jz5thl.jpg)" }}>
         <div className="flex flex-col justify-center h-full text-white p-12">
-          <h1 className="text-4xl font-bold mb-4">Turn Your Ideas into Reality</h1>
-          <p className="text-lg">Start for free and get attractive offers from the community</p>
+          <h1 className="text-4xl font-bold mb-4">Buy and sell farm produce with ease</h1>
+          <p className="text-lg">Join the marketplace that connects local farmers and fresh food lovers.</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { AccountState } from "./accountTypes";
 import { AddressData } from "./accountTypes";
+import { AxiosError } from "axios";
 
 import {
   updateEmailApi,
@@ -11,7 +12,7 @@ import {
   fetchAddressApi
 } from "./createAccountActions";
 
-const useAccountStore = create<AccountState>((set, get) => ({
+const useAccountStore = create<AccountState>((set) => ({
   // 🔹 Base fields
   name: "",
   email: "",
@@ -49,7 +50,8 @@ const useAccountStore = create<AccountState>((set, get) => ({
   updateName: async (userId: string, username: string) => {
     try {
       const result = await updateNameApi(userId, username);
-      console.log("Name updated:", result);
+      return result
+      // console.log("Name updated:", result);
     } catch (err) {
       console.error(err);
     }
@@ -59,8 +61,9 @@ const useAccountStore = create<AccountState>((set, get) => ({
     try {
       const result = await updateEmailApi(userId, newEmail);
       return result;
-    } catch (err: any) {
-      console.error("[Zustand] updateEmail failed:", err.response?.data || err.message);
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.error("[Zustand] updateEmail failed:", error.response?.data || error.message);
       throw err;
     }
   },
@@ -78,8 +81,9 @@ const useAccountStore = create<AccountState>((set, get) => ({
     try {
       const res = await updatePasswordApi(currentPassword, newPassword);
       return res;
-    } catch (err: any) {
-      throw new Error(err.message || "Failed to update password");
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      throw new Error(error.message || "Failed to update password");
     }
   },
 
@@ -87,8 +91,9 @@ const useAccountStore = create<AccountState>((set, get) => ({
     try {
       const res = await updateAddressApi(data);
       return res;
-    } catch (err: any) {
-      console.error("[Zustand] updateAddress failed:", err.response?.data || err.message);
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.error("[Zustand] updateAddress failed:", error.response?.data || error.message);
       throw err;
     }
   },

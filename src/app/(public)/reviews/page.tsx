@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, Star, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Review {
   name: string;
@@ -61,7 +62,8 @@ export default function ReviewsPage() {
     if (stored) {
       try {
         loadedReviews = JSON.parse(stored);
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error("Failed to parse reviews:", e);
         loadedReviews = defaultReviews;
       }
     } else {
@@ -125,10 +127,12 @@ export default function ReviewsPage() {
             className="border border-gray-200 rounded-3xl p-6 flex flex-col sm:flex-row gap-6"
           >
             <div className="flex-shrink-0">
-              <img
-                src={review.image}
+              <Image
+                src={review.image || "/placeholder.jpg"}
                 alt={review.name}
-                className="w-16 h-16 rounded-full object-cover border border-gray-200"
+                width={64}  // equivalent to w-16
+                height={64} // equivalent to h-16
+                className="rounded-full object-cover border border-gray-200"
               />
             </div>
 

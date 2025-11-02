@@ -1,12 +1,13 @@
-// app/layout.tsx or app/layout.tsx (depending on your structure)
-
+// app/(whatever)/layout.tsx — the one with Header/Footer
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Footer from "../components/Footer/Footer";
 import Header from "../components/Header/Header";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthWrapper } from "../components/AuthProvider/AuthProvider";
-import {Toaster} from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import "../globals.css";
+import ScrollToTop from "app/dashboard/ScrollToTop";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,19 +26,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
-        <Toaster position="top-right" reverseOrder={false} />
-        <AuthWrapper>
-          <Header />
-          {children}
-          <Footer />
-        </AuthWrapper>
-      </body>
+      <Suspense>
+        <body>
+          <Toaster position="top-right" reverseOrder={false} />
+          <AuthWrapper>
+            <Header />
+            <ScrollToTop />
+            {children}
+            <Footer />
+          </AuthWrapper>
+        </body>
+      </Suspense>
     </html>
   );
 }

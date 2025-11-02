@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
 import ProductInfo from "../../components/pageProps/productDetails/ProductInfo";
 import ProductsOnSale from "../../components/pageProps/productDetails/ProductsOnSale";
-import ProductReviews from '../ProductDetails/ProductReviews'
 import useProductStore from "../../store/useProductStore"; // Import the product store
 
 
@@ -63,16 +62,4 @@ const ProductDetails = () => {
 
 export default ProductDetails;
 
-
-// useEffect(() => {
-//   fetchProducts(); // Fetch products when the component mounts
-// }, [fetchProducts]);
-
-// if (isLoading) {
-//   return <div>Loading...</div>; // Loading state
-// }
-
-// if (error) {
-//   return <div>Error: {error}</div>; // Error state
-// }
 

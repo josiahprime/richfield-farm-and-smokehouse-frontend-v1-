@@ -31,9 +31,12 @@ export interface AccountState {
   setPostalCode: (postalCode: string) => void;
 
   // ✅ Actions
-  updateName: (userId: string, username: string) => Promise<void>;
-  updateEmail: (userId: string, email: string) => Promise<void>;
-  updatePhone: (userId: string, phone: string) => Promise<void>;
+  // updateName: (userId: string, username: string) => Promise<void>;
+  // updateEmail: (userId: string, email: string) => Promise<void>;
+  // updatePhone: (userId: string, phone: string) => Promise<void>;
+  updateEmail: (userId: string, email: string) => Promise<{ message: string }>;
+  updatePhone: (userId: string, phone: string) => Promise<{ message: string }>;
+  updateName: (userId: string, username: string) => Promise<{ message: string }>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateAddress: (data: AddressData) => Promise<void>;
   fetchAddress: () => Promise<void>;

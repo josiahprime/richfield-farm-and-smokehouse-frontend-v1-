@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 import Button from "app/components/Button/Button";
+import { useAuthStore } from "store/auth/useAuthStore";
 
 const notificationIconMap = {
   order: { icon: Package, color: "text-orange-600", bgColor: "bg-orange-100" },
@@ -32,6 +33,7 @@ export function NotificationsContent() {
   const [visibleCount, setVisibleCount] = useState(10);
   const searchParams = useSearchParams();
   const currentSection = searchParams.get("section");
+  const userId = useAuthStore((state)=>state.authUser?.id)
   const router = useRouter();
 
   const notifications = useNotificationsStore((state) => state.notifications);
@@ -45,8 +47,11 @@ export function NotificationsContent() {
   }, []);
 
   useEffect(() => {
-    markAllAsSeen();
-  }, []);
+    if (userId) {
+      markAllAsSeen(userId);
+    }
+  }, [userId, markAllAsSeen]);
+
 
   const unreadCount = notifications.filter((n) => !n.seen).length;
   const visibleNotifications = notifications.slice(0, visibleCount);
@@ -66,6 +71,8 @@ export function NotificationsContent() {
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 10);
   };
+
+  
 
   if (isLoading) {
     return (
@@ -131,13 +138,10 @@ export function NotificationsContent() {
       ) : (
         <div className="space-y-4">
           {visibleNotifications.map((notification) => {
-            const {
-              icon: IconComponent,
-              color,
-              bgColor,
-            } =
-              notificationIconMap[notification.type] ||
-              notificationIconMap.default;
+            const { icon: IconComponent, color, bgColor } =
+            notificationIconMap[notification.type as keyof typeof notificationIconMap] ||
+            notificationIconMap.default;
+
 
             return (
               <div

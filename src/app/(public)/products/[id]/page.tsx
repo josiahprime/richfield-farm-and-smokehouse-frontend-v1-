@@ -1,39 +1,43 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 import ProductInfo from "../../../../../sections/pageProps/productDetails/ProductInfo";
 import ProductsOnSale from "../../../../../sections/pageProps/productDetails/ProductsOnSale";
+import ProductInfoSkeleton from "app/components/ui/ProductInfoSkeleton";
 import { useProductStore } from "store/product/useProductStore";
+import { useAuthStore } from "store/auth/useAuthStore";
 import ProductTabs from "../../../../../sections/pageProps/productDetails/ProductTabs";
 import ProductReviews from "../../../../../sections/pageProps/productDetails/ProductReviews";
 import ProductFAQs from "../../../../../sections/pageProps/productDetails/ProductFaq";
-import ProductDetailsSection  from "../../../../../sections/pageProps/productDetails/ProductDetailsSection";
+import ProductDetailsSection from "../../../../../sections/pageProps/productDetails/ProductDetailsSection";
 
 const ProductDetails = () => {
-  const { id } = useParams();
-  const [productInfo, setProductInfo] = useState<Product | null>(null);
-  const [activeTab, setActiveTab] = useState("details"); // 👈 state for controlling tabs
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const products = useProductStore((state) => state.products);
-  const fetchProducts = useProductStore((state) => state.fetchProducts);
+  const userId = useAuthStore((state) => state.authUser?.id);
+
+
+  // ✅ Use individual selectors (no infinite render loops)
+  const singleProduct = useProductStore((state) => state.singleProduct);
+  const fetchProductById = useProductStore((state) => state.fetchProductById);
   const isLoading = useProductStore((state) => state.isLoading);
 
-  useEffect(() => {
-    if (!products || products.length === 0) {
-      fetchProducts();
-    }
-  }, [fetchProducts]);
+  const [activeTab, setActiveTab] = React.useState<
+    "details" | "reviews" | "faqs"
+  >("details");
 
   useEffect(() => {
-    if (products && products.length > 0 && id) {
-      const foundProduct = products.find((p) => p.id === id);
-      setProductInfo(foundProduct || null);
+    if (id) {
+      fetchProductById(id, userId);
     }
-  }, [products, id]);
+  }, [id, userId, fetchProductById]);
 
-  if (isLoading || !productInfo) {
-    return <div className="text-center mt-10 text-gray-600">Loading product...</div>;
+  if (isLoading || !singleProduct) {
+    return (
+      <ProductInfoSkeleton/>
+    );
   }
 
   return (
@@ -41,31 +45,26 @@ const ProductDetails = () => {
       <div className="mx-auto p-4">
         <div className="w-full">
           <div className="xl:col-span-2">
-            {/* Product info (main gallery, price, etc.) */}
-            <ProductInfo productInfo={productInfo} />
+            {/* Product info */}
+            <ProductInfo productInfo={singleProduct} />
 
-            {/* Tabs for details/reviews/faqs  */}
+            {/* Tabs */}
             <ProductTabs
               activeTab={activeTab}
               setActiveTab={setActiveTab}
-              reviews={productInfo.reviews}
+              reviews={singleProduct.reviews}
             />
 
-            {/* Conditionally render based on the tab */}
+            {/* Conditional sections */}
             {activeTab === "details" && (
-              <ProductDetailsSection  productInfo={productInfo} />
+              <ProductDetailsSection productInfo={singleProduct} />
             )}
-
-
             {activeTab === "reviews" && (
-              <ProductReviews productId={productInfo.id}/>
+              <ProductReviews productId={singleProduct.id} />
             )}
+            {activeTab === "faqs" && <ProductFAQs />}
 
-            {activeTab === "faqs" && (
-              <ProductFAQs/>
-            )}
-
-             {/* Products on sale always at bottom */}
+            {/* Products on sale */}
             <div className="mt-12">
               <ProductsOnSale />
             </div>

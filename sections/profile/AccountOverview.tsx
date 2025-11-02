@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "store/auth/useAuthStore";
 import Button from "app/components/Button/Button";
+import Image from "next/image";
 
 export function AccountOverview() {
   const authUser = useAuthStore((state) => state.authUser);
@@ -18,70 +19,65 @@ export function AccountOverview() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-100 p-6 flex items-center gap-5 shadow-sm border border-emerald-100">
-        <div className="relative">
+      
+
+      <div className="rounded-2xl bg-gradient-to-r from-green-600 to-emerald-700 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:gap-5 text-white shadow-sm">
+        {/* Avatar */}
+        <div className="flex justify-center sm:justify-start mb-4 sm:mb-0">
           {authUser?.profilePic ? (
-            <img
-              src={authUser.profilePic}
-              alt="Profile"
-              className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md"
-            />
+            <div className="relative w-20 h-20 sm:w-16 sm:h-16">
+              <Image
+                src={authUser.profilePic}
+                alt="Profile"
+                fill
+                sizes="80px"
+                className="rounded-full object-cover border-4 border-white shadow-md"
+              />
+            </div>
           ) : (
-            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-inner border border-gray-100">
-              <User className="w-7 h-7 text-gray-500" />
+            <div className="w-20 h-20 sm:w-16 sm:h-16 rounded-full bg-white/20 flex items-center justify-center shadow-inner border border-white/30">
+              <User className="w-8 h-8 sm:w-7 sm:h-7 text-white/90" />
             </div>
           )}
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back, {firstName}
+
+        {/* Text */}
+        <div className="text-center sm:text-left">
+          <h1 className="text-lg sm:text-2xl font-semibold">
+            Hi, {firstName}
           </h1>
-          <p className="text-gray-600 text-sm">
-            Manage your Farm Fresh account easily.
+          <p className="text-[13px] sm:text-base text-white/80 mt-1 sm:mt-0">
+            Stay connected and track your activities effortlessly.
           </p>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+
+      {/* 🔹 Redesigned Quick Stats */}
+      <div className="mt-5 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 gap-3">
         {[
-          {
-            icon: <Shield className="text-green-600 w-6 h-6" />,
-            label: "Status",
-            value: "Verified",
-            color: "green",
-          },
-          {
-            icon: <Star className="text-yellow-600 w-6 h-6" />,
-            label: "Member Since",
-            value: "2023",
-            color: "yellow",
-          },
-          {
-            icon: <Gift className="text-blue-600 w-6 h-6" />,
-            label: "Total Orders",
-            value: "12",
-            color: "blue",
-          },
-        ].map((item, i) => (
+          { key: "status", label: "Status", Icon: Shield, color: "green", value: "Verified" },
+          { key: "member", label: "Member", Icon: Star, color: "yellow", value: "2023" },
+          { key: "orders", label: "Orders", Icon: Gift, color: "blue", value: "12" },
+          { key: "points", label: "Points", Icon: User, color: "purple", value: "540" },
+        ].map((it) => (
           <div
-            key={i}
-            className={`p-5 rounded-2xl bg-white border-l-4 border-${item.color}-500 shadow-sm hover:shadow-md transition-all duration-300`}
+            key={it.key}
+            className="bg-white rounded-xl p-3 flex flex-col items-center justify-center text-gray-700 shadow-sm hover:shadow-md transition-all hover:scale-[1.02]"
           >
-            <div className="flex items-center gap-4">
-              <div
-                className={`w-12 h-12 flex items-center justify-center rounded-xl bg-${item.color}-50`}
-              >
-                {item.icon}
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{item.label}</p>
-                <p className="font-semibold text-gray-800">{item.value}</p>
-              </div>
+            <div className={`p-2 rounded-full bg-${it.color}-50 mb-1`}>
+              <it.Icon className={`w-5 h-5 text-${it.color}-600`} />
             </div>
+            <span className="text-[11px] text-center leading-tight font-medium text-gray-500">
+              {it.label}
+            </span>
+            <span className="text-[12px] font-semibold text-gray-800">{it.value}</span>
           </div>
         ))}
       </div>
+
+
 
       {/* Account Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -94,7 +90,7 @@ export function AccountOverview() {
           <div className="p-6 space-y-3">
             <div>
               <p className="text-sm text-gray-500 mb-1">Full Name</p>
-              <p className="font-semibold text-gray-900">{authUser?.name}</p>
+              <p className="font-semibold text-gray-900">{authUser?.username}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Email Address</p>
@@ -118,7 +114,7 @@ export function AccountOverview() {
             <h3 className="font-semibold text-green-700 text-lg">Default Address</h3>
           </div>
           <div className="p-6">
-            <p className="font-semibold text-gray-900 mb-1">{authUser?.name}</p>
+            <p className="font-semibold text-gray-900 mb-1">{authUser?.username}</p>
             <p className="text-gray-700 text-sm">
               Chukuku opposite lea primary school
             </p>

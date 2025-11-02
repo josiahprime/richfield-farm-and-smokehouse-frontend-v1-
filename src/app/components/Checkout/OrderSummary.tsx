@@ -1,8 +1,10 @@
-
-import { ShoppingBag, Tag, TrendingUp, Truck } from "lucide-react";
+'use client'
+import { ShoppingBag, TrendingUp } from "lucide-react";
 import Skeleton from "../ui/Skeleton";
 import { formatCurrency } from "utils/FormatCurrency";
 import { useOrderStore } from "store/order/useOrderStore";
+import Image from "next/image";
+import { useEffect } from "react";
 
 
 interface OrderItem {
@@ -21,17 +23,20 @@ interface OrderSummaryProps {
 }
 
 
-const OrderSummary = ({ items, amount, calculationDone }: OrderSummaryProps) => {
+
+
+
+const OrderSummary = ({ items, calculationDone }: OrderSummaryProps) => {
+
+  useEffect(() => {
+    console.log("Hydration OK: OrderSummary");
+  }, []);
   
   const preview = useOrderStore((state)=>(state.preview))
 
   console.log("calculationDone", calculationDone);
   console.log("preview", preview);
 
-  // const subtotal = amount;
-  // const shipping = 500; // ₦5.00 shipping
-  // const tax = Math.round(subtotal * 0.075); // 7.5% VAT
-  // const total = subtotal + shipping + tax;
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-2xl border border-white/20 h-fit sticky top-24">
@@ -50,18 +55,19 @@ const OrderSummary = ({ items, amount, calculationDone }: OrderSummaryProps) => 
         {items.map((item) => (
           <div key={item.id} className="group">
             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:shadow-md transition-all duration-200">
-              <div className="relative">
-                <img 
-                  src={item.image} 
+              <div className="relative w-16 h-16">
+                <Image
+                  src={item.image}
                   alt={item.productName}
-                  className="w-16 h-16 object-cover rounded-xl shadow-sm"
+                  fill
+                  className="object-cover rounded-xl shadow-sm"
                 />
                 <div className="absolute -top-2 -right-2 bg-gradient-to-r from-green-600 to-emerald-700 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                   {item.quantity}
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-green-600 transition-colors">
+                <h4 className="font-semibold text-gray-900 text-lg truncate group-hover:text-green-600 transition-colors">
                   {item.productName}
                 </h4>
                 <p className="text-sm text-gray-600 mt-1">
@@ -95,19 +101,10 @@ const OrderSummary = ({ items, amount, calculationDone }: OrderSummaryProps) => 
             <div className="border-t border-gray-200 pt-4">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold text-gray-900">Total</span>
-                <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent">
+                <span className="md:text-2xl text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent">
                   {formatCurrency(preview.total)}
                 </span>
               </div>
-              {/* <div className="flex items-center justify-center w-full mt-10">
-                <button
-                  type="submit"
-                  className="bg-gradient-to-r from-green-600 to-emerald-700 text-white py-6 px-12 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  <span>Proceed to Payment</span>
-                  <Truck className="w-5 h-5" />
-                </button>
-              </div> */}
             </div>
           </>
         ) : (
@@ -137,19 +134,6 @@ const OrderSummary = ({ items, amount, calculationDone }: OrderSummaryProps) => 
         )}
       </div>
 
-
-      {/* Promotional Badge */}
-      {/* <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200">
-        <div className="flex items-center space-x-3">
-          <div className="bg-green-100 p-2 rounded-full">
-            <Tag className="w-4 h-4 text-green-600" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-green-800">Free shipping included!</p>
-            <p className="text-xs text-green-600">Orders over ₦20,000 qualify</p>
-          </div>
-        </div>
-      </div> */}
 
       {/* Trust Indicators */}
       <div className="mt-6 grid grid-cols-2 gap-4">

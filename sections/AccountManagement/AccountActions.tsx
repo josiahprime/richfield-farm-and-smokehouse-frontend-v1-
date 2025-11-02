@@ -1,14 +1,11 @@
 "use client";
 import { useState } from "react";
-import { LogOut, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 
 export const AccountActions = () => {
   const [showDialog, setShowDialog] = useState(false);
 
-  const handleLogout = () => {
-    toast.success("Logged out successfully!");
-  };
 
   const handleDeleteAccount = () => {
     toast.error("Account deletion initiated");
@@ -22,15 +19,6 @@ export const AccountActions = () => {
       </h2>
 
       <div className="space-y-4">
-        {/* Logout Button */}
-        {/* <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-white bg-gradient-to-r from-blue-500/80 to-cyan-400/70 
-                     hover:from-blue-600/90 hover:to-cyan-500/80 active:scale-95 transition-all shadow-md shadow-blue-500/30"
-        >
-          <LogOut className="h-5 w-5" />
-          Logout
-        </button> */}
 
         {/* Delete Account Button */}
         <button

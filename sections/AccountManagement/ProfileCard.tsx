@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Save } from "lucide-react";
+import { AxiosError } from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import useAccountStore from "store/account/useAccountStore";
 import { useAuthStore } from "store/auth/useAuthStore";
@@ -15,7 +16,7 @@ type Profile = {
 
 export const ProfileCard = () => {
   const authUser = useAuthStore((state) => state.authUser);
-  console.log('authusser from profile card', authUser)
+  console.log('authuser from profile card', authUser)
   const userId = authUser?.id ?? null;
 
   const [profile, setProfile] = useState<Profile>({
@@ -55,14 +56,21 @@ export const ProfileCard = () => {
         await updateName(userId, profile.username);
         toast.success("Username updated successfully!");
         setFeedback((f) => ({ ...f, username: "Username updated successfully." }));
-      } catch (err: any) {
-        toast.error(err.response?.data?.error || "Failed to update username");
+      } catch (err) {
+        const error = err as AxiosError<{ error: string }>;
+        toast.error(error.response?.data?.error || "Failed to update username");
         setFeedback((f) => ({ ...f, username: "Failed to update username." }));
       }
     }
 
     // --- Email ---
-    if (pendingEmail !== authUser?.email) {
+    if (authUser?.authProvider === "google") {
+      // Skip email update entirely for Google users
+      setFeedback((f) => ({
+        ...f,
+        email: "Email is managed by Google login and cannot be changed.",
+      }));
+    } else if (pendingEmail !== authUser?.email) {
       if (!gmailRegex.test(pendingEmail)) {
         setFeedback((f) => ({ ...f, email: "Invalid email format. Please enter a valid Gmail address." }));
         setIsUpdating(false);
@@ -72,11 +80,13 @@ export const ProfileCard = () => {
         const response = await updateEmail(userId, pendingEmail);
         toast.success(response.message || "Email updated successfully!");
         setFeedback((f) => ({ ...f, email: "Email updated successfully." }));
-      } catch (err: any) {
-        toast.error(err.response?.data?.error || "Email update failed");
+      } catch (err) {
+        const error = err as AxiosError<{ error: string }>;
+        toast.error(error.response?.data?.error || "Email update failed");
         setFeedback((f) => ({ ...f, email: "Failed to update email." }));
       }
     }
+
 
     // --- Phone ---
     if (pendingPhone !== profile.phone) {
@@ -89,8 +99,9 @@ export const ProfileCard = () => {
         const response = await updatePhone(userId, pendingPhone);
         toast.success(response.message || "Phone number updated successfully!");
         setFeedback((f) => ({ ...f, phone: "Phone number updated successfully." }));
-      } catch (err: any) {
-        toast.error(err.response?.data?.error || "Failed to update phone number");
+      } catch (err) {
+        const error = err as AxiosError<{ error: string }>;
+        toast.error(error.response?.data?.error || "Failed to update phone number");
         setFeedback((f) => ({ ...f, phone: "Failed to update phone number." }));
       }
     }
@@ -104,10 +115,11 @@ export const ProfileCard = () => {
         ...profile,
         username: authUser.username,
         email: authUser.email,
-        phone: authUser.phone,
+        phone: authUser?.phone || "",
       });
-      setPendingEmail(authUser.email);
-      setPendingPhone(authUser.phone);
+      setPendingEmail(authUser.email ?? "");
+      setPendingPhone(authUser.phone ?? "");
+
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
@@ -149,10 +161,16 @@ export const ProfileCard = () => {
             type="email"
             value={pendingEmail}
             onChange={(e) => setPendingEmail(e.target.value)}
-            className="w-full pl-4 pr-4 py-4 border border-green-300 rounded-xl bg-green-100 
-            focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-600 text-gray-900 transition-all"
+            disabled={authUser?.authProvider === "google"} // disable if Google user
+            className={`w-full pl-4 pr-4 py-4 border border-green-300 rounded-xl bg-green-100 
+              focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-600 text-gray-900 transition-all
+              ${authUser?.authProvider === "google" ? "opacity-50 cursor-not-allowed" : ""}`}
             placeholder="Enter new email"
           />
+          {authUser?.authProvider === "google" && (
+            <p className="text-sm text-gray-500 mt-1">Email is managed by Google login.</p>
+          )}
+
           {renderFeedback(feedback.email)}
         </div>
 
@@ -188,3 +206,7 @@ export const ProfileCard = () => {
     </div>
   );
 };
+
+
+
+

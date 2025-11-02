@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Check, Star, ChevronLeft } from "lucide-react";
 import { useReviewStore } from "store/review/useReviewStore";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 
 interface Review {
   id?: string;
@@ -14,6 +15,21 @@ interface Review {
   date: string;
   profile?: string;
 }
+
+
+
+
+interface DisplayReview {
+  id: string;
+  name: string;
+  rating: number;
+  verified: boolean;
+  text: string;
+  date: string;
+  profile?: string;
+}
+
+
 
 const defaultReviews: Review[] = [
   {
@@ -67,16 +83,17 @@ export default function ReviewsPage() {
   }, [productId, fetchReviews]);
 
   // 🔹 Handle default vs real reviews
+  // inside your useEffect
   useEffect(() => {
     if (reviews && reviews.length > 0) {
-      const mapped = reviews.map((r) => ({
+      const mapped: DisplayReview[] = reviews.map((r) => ({
         id: r.id,
         name: r.user?.name || "Anonymous",
         rating: r.rating,
         verified: true,
         text: r.text,
         date: new Date(r.createdAt).toLocaleDateString(),
-        profile: (r.user as any)?.profile,
+        profile: r.user?.profilePic, // ✅ correct property
       }));
       setDisplayReviews(mapped);
     } else {
@@ -129,10 +146,12 @@ export default function ReviewsPage() {
             {/* Profile Image or Initial */}
             <div className="flex-shrink-0">
               {review.profile ? (
-                <img
+                <Image
                   src={review.profile}
                   alt={review.name}
-                  className="w-16 h-16 rounded-full object-cover border border-gray-200"
+                  width={64} // w-16
+                  height={64} // h-16
+                  className="rounded-full object-cover border border-gray-200"
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
@@ -140,6 +159,7 @@ export default function ReviewsPage() {
                 </div>
               )}
             </div>
+
 
             <div className="flex-1">
               <div className="flex items-center justify-between flex-wrap gap-2">

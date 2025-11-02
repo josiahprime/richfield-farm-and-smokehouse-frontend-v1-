@@ -1,10 +1,10 @@
-// REFACTORED SHIPPING FORM
+'use client'
 import { useState } from "react";
 import { CartItem } from "store/cart/cartTypes";
+ import { SingleValue, ActionMeta, MultiValue } from "react-select";
 import { useOrderStore } from "store/order/useOrderStore";
 import toast from "react-hot-toast";
-
-import Select from "react-select";
+import ClientSelect, { ClientSelectOption } from "./ShippingForm/ClientSelect";
 import { statesWithLGAs } from "utils/nigeriaRegions";
 import { Truck, MapPin, User, Mail, Phone, Home, Package, Loader } from "lucide-react";
 
@@ -16,8 +16,25 @@ interface ShippingFormProps {
   setDeliveryType: React.Dispatch<React.SetStateAction<"home" | "pickup">>;
   cartItems: CartItem[]; // ✅ Add this
   setCalculationDone: React.Dispatch<React.SetStateAction<boolean>>;
-  previewOrder: (cartItems: CartItem[], userAddress: { state: string; city: string }, deliveryType: string) => Promise<any>; // ✅ Add this
+  previewOrder: (cartItems: CartItem[], userAddress: { state: string; city: string }, deliveryType: string) => Promise<PreviewOrderResponse>; // ✅ Add this
 }
+
+interface PreviewOrderResponse {
+  total: number;
+  shippingFee: number;
+  estimatedDelivery?: string;
+  // add other fields your API returns
+}
+
+
+interface SelectOption {
+  value: string;
+  label: string;
+  lgas?: { value: string; label: string }[];
+}
+
+
+
 
 
 export type FormField =
@@ -35,32 +52,49 @@ export type FormField =
 
 const pickupStations = [
   "Behind Forest Hotel Chukuku Village, Along Kuje Road FCT, Abuja, Nigeria",
-  // "Ikeja City Mall Pickup Station, Lagos",
-  // "Abuja Central Pickup Station, FCT",
-  // "Port Harcourt Main Pickup Station, Rivers",
-  // "Kano Commerce Pickup Station, Kano",
-  // "Ibadan Gateway Pickup Station, Oyo"
 ];
 
 
 
 const ShippingForm = ({ formData, handleChange, onNext, deliveryType, setDeliveryType,  cartItems, previewOrder,setCalculationDone}: ShippingFormProps) => {
   const [selectedPickupStation, setSelectedPickupStation] = useState("");
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedLGA, setSelectedLGA] = useState(null);
+  const [selectedState, setSelectedState] = useState<SelectOption | null>(null);
+  const [selectedLGA, setSelectedLGA] = useState<{ value: string; label: string } | null>(null);
   const loading = useOrderStore((state) => state.loading);
 
   
-  const handleStateChange = (option) => {
-    setSelectedState(option);
+ 
+
+  const handleStateChange = (
+    option: SingleValue<ClientSelectOption> | MultiValue<ClientSelectOption>,
+    _: ActionMeta<ClientSelectOption>
+  ) => {
+    const selected = Array.isArray(option) ? option[0] : option; // handle both cases safely
+    setSelectedState(selected || null);
     setSelectedLGA(null);
-    handleChange({ target: { name: "state", value: option?.value || "" } } as any);
+    handleChange({
+      target: {
+        name: "state",
+        value: selected?.value || "",
+      },
+    } as React.ChangeEvent<HTMLInputElement>);
   };
 
-  const handleLGAChange = (option) => {
-    setSelectedLGA(option);
-    handleChange({ target: { name: "city", value: option?.value || "" } } as any);
+  // same pattern for LGA
+  const handleLGAChange = (
+    option: SingleValue<ClientSelectOption> | MultiValue<ClientSelectOption>,
+    _: ActionMeta<ClientSelectOption>
+  ) => {
+    const selected = Array.isArray(option) ? option[0] : option;
+    setSelectedLGA(selected || null);
+    handleChange({
+      target: {
+        name: "city",
+        value: selected?.value || "",
+      },
+    } as React.ChangeEvent<HTMLInputElement>);
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +115,7 @@ const ShippingForm = ({ formData, handleChange, onNext, deliveryType, setDeliver
         setCalculationDone(true); // ✅ unlock payment step
         onNext(); // proceed to payment step
       } catch (error) {
+        console.error(error)
         toast.error("Failed to calculate order. Please try again.");
       }
     } else if (deliveryType === "pickup") {
@@ -94,6 +129,7 @@ const ShippingForm = ({ formData, handleChange, onNext, deliveryType, setDeliver
         setCalculationDone(true); // ✅ unlock payment step
         onNext();
       } catch (error) {
+        console.error(error)
         toast.error("Failed to calculate order. Please try again.");
       }
     }
@@ -201,7 +237,7 @@ const ShippingForm = ({ formData, handleChange, onNext, deliveryType, setDeliver
               <label className="block text-sm font-semibold text-green-600 mb-2">
                 State
               </label>
-              <Select
+              <ClientSelect
                 isSearchable={false}
                 options={statesWithLGAs}
                 value={selectedState}
@@ -219,7 +255,7 @@ const ShippingForm = ({ formData, handleChange, onNext, deliveryType, setDeliver
               <label className="block text-sm font-semibold text-green-600 mb-2">
                 City / LGA
               </label>
-              <Select
+              <ClientSelect
                 isSearchable={false}
                 options={selectedState?.lgas || []}
                 value={selectedLGA}
@@ -317,7 +353,7 @@ const ShippingForm = ({ formData, handleChange, onNext, deliveryType, setDeliver
                   key={station}
                   onClick={() => {
                     setSelectedPickupStation(station);
-                    handleChange({ target: { name: "pickupStation", value: station } } as any);
+                    handleChange({ target: { name: "pickupStation", value: station } } as React.ChangeEvent<HTMLInputElement>);
                   }}
                   className={`p-3 rounded-lg border cursor-pointer transition-all ${
                     selectedPickupStation === station

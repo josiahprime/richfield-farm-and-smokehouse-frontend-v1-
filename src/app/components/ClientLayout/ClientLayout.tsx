@@ -13,7 +13,8 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
+
 
   if (isCheckingAuth) {
     return (

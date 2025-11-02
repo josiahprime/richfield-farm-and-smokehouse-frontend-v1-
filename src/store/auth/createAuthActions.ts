@@ -3,16 +3,18 @@
 import { StateCreator } from 'zustand';
 import toast from 'react-hot-toast';
 import { axiosInstance } from '../../lib/axios';
+// import { setIsLoggingOut } from '../../lib/axios';
 import { useAuthStore } from './useAuthStore';
+import { useCartStore } from 'store/cart/useCartStore';
+import { AxiosError } from 'axios';
 import {
   AuthSlice,
   AuthActions,
   SignupPayload,
   LoginPayload,
   VerifyEmailPayload,
-  UpdateProfilePayload,
   ResetPasswordPayload,
-  AuthUser,
+  UpdateProfilePayload,
 } from './types';
 
 // ✅ Only return the actions here — not the state
@@ -27,22 +29,24 @@ export const createAuthActions: StateCreator<
   clearAccessToken: () => set({ accessToken: null }),
 
   setAuthUser: (user) => set({ authUser: user }),
+  
 
   checkAuth: async () => {
     console.log('🔁 Starting auth check...');
-    // set({ isCheckingAuth: true });
+    set({ isCheckingAuth: true });
     try {
+      console.log('👀 hitting /auth/check');
       const res = await axiosInstance.get('/auth/check');
-      console.log('✅ Auth success:', res.data);
+      console.log('✅ got response');
       set({ authUser: res.data });
     } catch (err) {
-      console.error('❌ Full error response:', err.response);
-      // console.error('❌ Auth check failed:', err);
+      console.log('❌ error or timeout', err);
       set({ authUser: null });
     } finally {
-      console.log('🔚 Auth check finished');
+      console.log('🔚 setting isCheckingAuth=false');
       set({ isCheckingAuth: false });
     }
+
   },
 
 
@@ -54,10 +58,11 @@ export const createAuthActions: StateCreator<
         success: true,
         message: res.data.message || 'User registered successfully. Check your email.',
       };
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       return {
         success: false,
-        message: error?.response?.data?.message || 'Signup failed',
+        message: error?.response?.data?.error || 'Signup failed',
       };
     } finally {
       set({ isSigningUp: false });
@@ -67,9 +72,10 @@ export const createAuthActions: StateCreator<
   login: async (data: LoginPayload) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post('/auth/login', data);
+      const res = await axiosInstance.post('/auth/login', data, { withCredentials: true });
       
       const token = res.data.accessToken;
+      console.log('token from backend', token)
       
       // Set axios default headers for future requests
       axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -77,45 +83,49 @@ export const createAuthActions: StateCreator<
       // get().setAccessToken(token);
       set({ authUser: res.data.user });
 
+      // Sync local cart with backend
+      const cart = useCartStore.getState();
+      await cart.mergeCart();
+
       toast.success('Logged in successfully');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      return true
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.log(error.response?.data?.error || 'Login failed');
+      return false
     } finally {
       set({ isLoggingIn: false });
     }
   },
 
+
   logout: async () => {
-    console.log('trying to logout')
-    const method = get().authUser?.authProvider;
+  console.log('trying to logout');
+  const method = get().authUser?.authProvider;
 
-    try {
-      if (method === 'google') {
-        await axiosInstance.get('/auth/google/logout');
-      } else {
-        await axiosInstance.post('/auth/logout');
-      }
+  try {
+    // setIsLoggingOut(true);
 
-      // ✅ Clear axios headers
-      delete axiosInstance.defaults.headers.common['Authorization'];
-      console.log('axios instance default headers after delete',axiosInstance.defaults.headers.common)
-
-      // ✅ Clear Zustand accessToken synchronously
-      set({
-        accessToken: null,
-        authUser: null,
-      });
-
-      // ✅ Reset auth state
-      set({ authUser: null, isCheckingAuth: false });
-
-      // ✅ Clear persisted Zustand storage if you're using persist
-       console.log('Access token after logout:', useAuthStore.getState().accessToken);
-      toast.success('Logged out successfully');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Logout failed');
+    if (method === 'google') {
+      await axiosInstance.get('/auth/google/logout');
+    } else {
+      await axiosInstance.post('/auth/logout');
     }
-  },
+
+    delete axiosInstance.defaults.headers.common['Authorization'];
+    set({ accessToken: null, authUser: null, isCheckingAuth: false });
+
+    toast.success('Logged out successfully');
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    toast.error(error.response?.data?.error || 'Logout failed');
+  } finally {
+    // setIsLoggingOut(false);
+    console.log('logged out')
+  }
+},
+
+
 
 
 
@@ -135,8 +145,9 @@ export const createAuthActions: StateCreator<
       toast.success(res.data.message || 'Email verified');
       set({ authUser: res.data });
       return true;
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Verification failed');
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      toast.error(error.response?.data?.error || 'Verification failed');
       return false;
     } finally {
       set({ isVerifyingEmail: false });
@@ -144,18 +155,30 @@ export const createAuthActions: StateCreator<
   },
 
   updateProfile: async (data: UpdateProfilePayload) => {
-    console.log('updating profile pics')
+    console.log("Updating profile picture...");
     set({ isUpdatingProfile: true });
+
     try {
-      const res = await axiosInstance.post('/auth/update-profile', data);
+      const formData = new FormData();
+      formData.append("profilePic", data.profilePic);
+
+      const res = await axiosInstance.post("/auth/update-profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       set({ authUser: res.data });
-      toast.success('Profile updated');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Update failed');
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.error("Update failed:", error);
+      toast.error(error.response?.data?.error || "Update failed");
     } finally {
       set({ isUpdatingProfile: false });
     }
   },
+
 
   requestPasswordReset: async (email: string) => {
     if (!email) {
@@ -166,8 +189,9 @@ export const createAuthActions: StateCreator<
     try {
       const res = await axiosInstance.post('/auth/forgot-password', { email });
       toast.success(res.data.message);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Reset request failed');
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      toast.error(error.response?.data?.error || 'Reset request failed');
     } finally {
       set({ isRequestingReset: false });
     }
@@ -179,8 +203,9 @@ export const createAuthActions: StateCreator<
       await axiosInstance.post('/auth/reset-password', data);
       toast.success('Password reset successfully');
       return true;
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Reset failed');
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      toast.error(error.response?.data?.error || 'Reset failed');
       return false;
     } finally {
       set({ isResettingPassword: false });
@@ -188,22 +213,28 @@ export const createAuthActions: StateCreator<
   },
 
   refreshAccessToken: async () => {
-    console.log('🔄 Starting token refresh...');
+    if (!useAuthStore.getState().authUser) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚫 No authenticated user, skipping token refresh.');
+      }
+      return null;
+    }
 
+    console.log('🔄 Starting token refresh...');
     try {
       const res = await axiosInstance.get('/auth/refresh', {
-        withCredentials: true, // Ensure cookies are sent
+        withCredentials: true,
       });
 
       const newAccessToken = res.data.accessToken;
       console.log('✅ Token refreshed successfully:', newAccessToken);
 
-      // Save to store
       useAuthStore.getState().setAccessToken(newAccessToken);
       console.log('🧠 Stored new access token in Zustand');
 
       return newAccessToken;
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       console.error('❌ Failed to refresh access token:', error?.response?.data || error.message);
       throw error;
     }
@@ -211,6 +242,7 @@ export const createAuthActions: StateCreator<
 
 
 
+  
   getAuthMethod: () => get().authUser?.authProvider || '',
   getRole: () => get().authUser?.role || 'guest',
 });

@@ -1,63 +1,88 @@
-"use client"
-import { Menu } from 'lucide-react';
-import MobileCategoryBar from './ScrollBar';
-import MobileSidebar from './MobileSidebar';
-import SaleBanner from './SaleBanner';
-import Logo from './Logo';
-import { NavLinks } from './NavLinks';
-import ThemeToggle from './ThemeToggle';
-import CartIcon from './CartIcon';
-import { useUiStore } from 'store/ui/useUiStore';
-// import ProfileSwitcher from './ProfileSwitcher';
-import UserIcon from './ProfileSwitcher'
-import SearchBar from './SearchBar';
-import LoginButton from './LoginButton';
-import { useAuthStore } from 'store/auth/useAuthStore';
-import { useProductStore } from 'store/product/useProductStore';
-import { ProductState } from 'store/product/productTypes';
-import { useEffect, useState } from 'react';
-import Notifications from './Notifications';
+"use client";
 
-
+import { Menu } from "lucide-react";
+import { useUiStore } from "store/ui/useUiStore";
+import { NavLinks } from "./NavLinks";
+import ThemeToggle from "./ThemeToggle";
+import CartIcon from "./CartIcon";
+import SaleBanner from "./SaleBanner";
+import Logo from "./Logo";
+import MobileSidebar from "./MobileSidebar";
+import UserIcon from "./ProfileSwitcher";
+import LoginButton from "./LoginButton";
+import Notifications from "./Notifications";
+import SearchBar from "./SearchBar";
+import { useAuthStore } from "store/auth/useAuthStore";
+import { useProductStore } from "store/product/useProductStore";
+import { ProductState } from "store/product/productTypes";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import NavbarSkeleton from "../ui/NavbarSkeleton";
+import SaleBannerSkeleton from "../ui/SalesBannerSkeleton";
 
 const Header = () => {
+  const pathname = usePathname();
+  const isProfilePage = pathname === "/account";
+
   const authUser = useAuthStore((state) => state.authUser);
-  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth)
-  const products = useProductStore((state: ProductState)=>(state.products))
-  const fetchProducts = useProductStore((state: ProductState)=>(state.fetchProducts))
-  const { toggleSidebar, isSidebarOpen, openSidebar, closeSidebar } = useUiStore();
-  const [isOpen, setIsOpen] = useState(false);
-  
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const products = useProductStore((state: ProductState) => state.products);
+  const fetchProducts = useProductStore((state: ProductState) => state.fetchProducts);
+  const { toggleSidebar } = useUiStore();
 
-    console.log("📦 products from the ProductsDB:", products);
-    useEffect(() => {
-      if (!products) {
-        fetchProducts();
-      }
-    }, [fetchProducts]);
+  useEffect(() => {
+    if (!products) fetchProducts();
+  }, [fetchProducts, products]);
 
-  
-  console.log(authUser)
+  const hideOnMobile = isProfilePage ? "hidden md:block" : "";
+  console.log('is checking auth from header',isCheckingAuth)
+
+  // 👉 If not authenticated and not checking, show skeleton (desktop only)
+  if (isCheckingAuth) {
+    return (
+      <header className={`sticky top-0 z-50 bg-white w-full ${hideOnMobile}`}>
+        <div className="hidden lg:block">
+          <SaleBannerSkeleton />
+          <NavbarSkeleton />
+        </div>
+        <div className="lg:hidden">
+          <div className="shadow-md">
+            <div className="flex items-center justify-between px-4 h-16">
+              <button
+                onClick={toggleSidebar}
+                className="text-gray-800 bg-white w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <Logo />
+              <CartIcon />
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+
+  // 👇 Normal navbar (authenticated or checking)
   return (
-    <header className="sticky top-0 z-50 bg-white ">
-      <div className='shadow-md'>
-        <div className=''>
+    <header className={`sticky top-0 z-50 bg-white w-full ${hideOnMobile}`}>
+      <div className="shadow-md">
+        <div>
           <SaleBanner />
         </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 sm:mb-2 lg:px-2 h-20 flex items-center justify-between">
-          
-          {/* Mobile toggle button */}
-          <div className='flex items-center'>
+          {/* Mobile toggle */}
+          <div className="flex items-center">
             <button
               onClick={toggleSidebar}
               className="lg:hidden text-gray-800 bg-white w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100"
             >
               <Menu className="w-5 h-5" />
             </button>
-
             <Logo />
-            </div>
-          
+          </div>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex">
@@ -65,52 +90,25 @@ const Header = () => {
           </div>
 
           <MobileSidebar />
-          <div className='hidden lg:flex'>
+
+          <div className="hidden lg:flex">
             <SearchBar products={products} />
           </div>
-          
-          
-          
-          <div className="items-center gap-4 hidden lg:flex">
-            {authUser ? <Notifications/> : ''}
-            <ThemeToggle />
-            {isCheckingAuth ? <AuthSkeleton /> : (
-              authUser ? <CartIcon /> : <LoginButton />
-            )}
-            
 
-            {/* {authUser ? <CartIcon /> : <LoginButton />} */}
-            {/* {!isCheckingAuth && authUser && <ProfileSwitcher />}mains*/}
+          <div className="items-center gap-4 hidden lg:flex">
+            {authUser && <Notifications />}
+            <ThemeToggle />
+            {authUser ? <CartIcon /> : <LoginButton />}
             {!isCheckingAuth && authUser && <UserIcon />}
           </div>
-        </div>
-        <div className='flex lg:hidden mt-2 items-center justify-center'>
-          <SearchBar products={products} />
-        </div>
-      
-      </div>
 
-      <div className=''>
-        <MobileCategoryBar/>
+          <div className="md:hidden block">
+            <CartIcon />
+          </div>
+        </div>
       </div>
     </header>
-    
   );
 };
 
 export default Header;
-
-//
-// AuthSkeleton defined below for local use
-//
-const AuthSkeleton = () => {
-  return (
-    <div className="w-28 h-12 flex items-center gap-2 animate-pulse">
-      <div className="w-12 h-12 rounded-full bg-gray-200" />
-      <div className="flex flex-col gap-1">
-        <div className="w-16 h-3 bg-gray-200 rounded" />
-        <div className="w-12 h-3 bg-gray-200 rounded" />
-      </div>
-    </div>
-  );
-};

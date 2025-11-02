@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Lock, Key, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 import useAccountStore from "store/account/useAccountStore";
+import { useAuthStore } from "store/auth/useAuthStore";
+import { AxiosError } from "axios";
 
 export const PasswordCard = () => {
   const [passwords, setPasswords] = useState({
@@ -18,6 +20,9 @@ export const PasswordCard = () => {
   });
 
   const updatePassword = useAccountStore((state) => state.updatePassword);
+  const isGoogleUser = useAuthStore((state)=>state.authUser?.authProvider)
+  // const isGoogleUser = authUser?.provider === "google";
+
 
   const handleUpdatePassword = async () => {
     if (passwords.new !== passwords.confirm) {
@@ -34,7 +39,8 @@ export const PasswordCard = () => {
       await updatePassword(passwords.current, passwords.new);
       toast.success("Password updated successfully!");
       setPasswords({ current: "", new: "", confirm: "" });
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       toast.error(error.message || "Failed to update password!");
     }
   };
@@ -42,6 +48,11 @@ export const PasswordCard = () => {
   return (
     <div className="bg-white rounded-3xl p-8 shadow-2xl border border-green-100">
       {/* HEADER */}
+      {isGoogleUser ? (
+          <p className="text-gray-600">
+            Your account is connected via Google. Password management is handled by Google and cannot be updated here.
+          </p>
+        ) : (<>
       <div className="flex items-center space-x-4 mb-8">
         <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-3 rounded-2xl">
           <ShieldCheck className="w-6 h-6 text-green-600" />
@@ -113,6 +124,7 @@ export const PasswordCard = () => {
           Update Password
         </button>
       </div>
+      </>)}
 
       {/* TOASTER */}
       <Toaster position="top-right" toastOptions={{ duration: 2000 }} />

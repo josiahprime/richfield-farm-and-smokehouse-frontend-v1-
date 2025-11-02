@@ -6,12 +6,22 @@ import OrdersContent from "./OrdersContent";
 import OrderDetails from "../OrderDetails/OrderDetails";
 import { useSearchParams } from "next/navigation";
 import NotificationDetail from "../NotificationDetail/NotificationDetail";
+import PendingReviews from "./PendingReviews";
+// import { NotificationsContent } from "./NotificationContent";
 import AccountManagement from "../AccountManagement/AccountManagementDetail";
 import WishlistPage from "./Wishlist";
+import VoucherPage from "./VoucherPage";
+import PaymentSettingsPage from "./PaymentSettingsPage";
+import Sellers from "./Sellers";
+import Address from "./Address";
+import NewsletterPreferencesPage from "./NewsletterPreferencesPage";
+import RecentlyViewed from "./RecentlyViewed";
 
 interface ProfileContentProps {
   activeSection: ProfileSection;
 }
+
+
 
 export function ProfileContent({ activeSection }: ProfileContentProps) {
   const searchParams = useSearchParams();
@@ -22,6 +32,9 @@ export function ProfileContent({ activeSection }: ProfileContentProps) {
     switch (activeSection) {
       case "account":
         return <AccountOverview />;
+
+      
+      
       
       case 'orders':
       return orderId ? (
@@ -37,25 +50,43 @@ export function ProfileContent({ activeSection }: ProfileContentProps) {
           <NotificationsContent />
         )
 
-      case "reviews":
-        return (
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="flex flex-col space-y-1.5 p-6 border-b">
-              <h3 className="text-2xl font-semibold leading-none tracking-tight">Pending Reviews</h3>
-            </div>
-            <div className="p-6 pt-0">
-              <p className="text-gray-600">Rate and review your recent purchases to help other customers.</p>
-            </div>
-          </div>
-        );
-
       case "wishlist":
         return (
           <WishlistPage/>
         );
 
-        case 'management':
+      case 'management':
         return <AccountManagement/>
+
+      case "reviews":
+        return <PendingReviews />;
+
+      case "payment":
+        return <PaymentSettingsPage/>;
+
+      case "voucher":
+        return <VoucherPage/>;
+
+        case "reviews":
+        return <PendingReviews />;
+  
+        case "voucher":
+          return <VoucherPage/>;
+  
+        case "payment":
+          return <PaymentSettingsPage/>;
+  
+        case "sellers":
+          return <Sellers/>;
+  
+        case 'address':
+          return <Address/>
+  
+        case 'recent':
+          return <RecentlyViewed/>
+  
+        case "newsletter":
+          return <NewsletterPreferencesPage/>;
 
       default:
         return (

@@ -8,21 +8,25 @@ import {
   Leaf,
   MoreHorizontal,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import useNotificationsStore from "store/notification/useNotificationStore";
 import { formatDistanceToNow } from "date-fns";
 
-const NotificationDetail = () => {
+interface NotificationDetailProps {
+  notificationId: string;
+}
+
+const NotificationDetail = ({ notificationId }: NotificationDetailProps) => {
   const notifications = useNotificationsStore((state) => state.notifications);
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  // const searchParams = useSearchParams();
+  // const id = searchParams.get("id");
 
 
 
   
 
-  const notification = notifications.find((n) => n.id === id);
+  const notification = notifications.find((n) => n.id === notificationId);
   console.log('notification', notification)
   //rounded-lg bg-card text-card-foreground shadow-lg
   if (!notification) {

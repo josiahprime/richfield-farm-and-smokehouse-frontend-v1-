@@ -6,9 +6,12 @@ import { toast } from "react-hot-toast";
 import { Mail, MapPin, Loader, User } from "lucide-react";
 import { statesWithLGAs } from "utils/nigeriaRegions";
 import useAccountStore from "store/account/useAccountStore";
+import { useAuthStore } from "store/auth/useAuthStore";
+import type { AddressData } from "store/account/accountTypes";
 
 export const AddressCard = () => {
   const [loading, setLoading] = useState(false);
+  const userId = useAuthStore((state)=>state.authUser?.id)
 
   // Zustand store
   const {
@@ -24,7 +27,8 @@ export const AddressCard = () => {
   } = useAccountStore();
 
   // Form data state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AddressData>({
+    userId: userId || "",
     fullName: "",
     email: "",
     state: "",
@@ -53,14 +57,16 @@ export const AddressCard = () => {
   // Sync formData and selects with Zustand when store values change
   useEffect(() => {
     setFormData({
-      fullName,
-      email,
-      state,
-      city,
-      address: streetAddress,
-      landmark,
-      postalCode,
+      fullName: fullName || "",
+      email: email || "",
+      state: state || "",
+      city: city || "",
+      address: streetAddress || "",
+      landmark: landmark || "",
+      postalCode: postalCode || "",
+      userId: userId || ''
     });
+
 
     const stateOption = statesWithLGAs.find((s) => s.value === state) || null;
     setSelectedState(stateOption);

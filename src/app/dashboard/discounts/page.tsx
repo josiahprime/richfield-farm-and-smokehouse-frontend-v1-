@@ -19,32 +19,11 @@ export interface Discount {
   endDate?: string;
 }
 
-// Dummy data (frontend-only)
-const dummyDiscounts: Discount[] = [
-  {
-    id: "1",
-    label: "Christmas Promo",
-    type: "PERCENTAGE",
-    value: 15,
-    isActive: true,
-    startDate: "2025-12-01",
-    endDate: "2025-12-31",
-  },
-  {
-    id: "2",
-    label: "New Year Sale",
-    type: "FIXED",
-    value: 5000,
-    isActive: false,
-    startDate: "2025-12-31",
-    endDate: "2026-01-05",
-  },
-];
 
 export default function Index() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Discount | null>(null);
-  const { discounts, loadDummyDiscounts, updateDiscount, deleteDiscount, addDiscount, fetchDiscounts, loading } = useDiscountStore();
+  const { discounts, updateDiscount, deleteDiscount, addDiscount, fetchDiscounts } = useDiscountStore();
   const [form, setForm] = useState<{
     label: string;
     type: DiscountType;
@@ -61,17 +40,28 @@ export default function Index() {
     isActive: true,
   });
 
-//   useEffect(() => {
-//     setDiscounts(dummyDiscounts);
-//   }, []);
+
+  useEffect(() => {
+    // Run after discounts are fetched
+    if (discounts.length > 0) {
+      const now = new Date();
+
+      discounts.forEach((discount) => {
+        if (discount.endDate && new Date(discount.endDate) < now) {
+          deleteDiscount(discount.id);
+          toast.success(`"${discount.label}" expired and was removed.`);
+        }
+      });
+    }
+  }, [discounts, deleteDiscount]);
+
+
+
 
     useEffect(() => {
-    // 👉 Use dummy data for local testing
-    // loadDummyDiscounts();
-
     // When backend is ready, just swap to:
     fetchDiscounts();
-    }, []);
+    }, [fetchDiscounts]);
 
   const resetForm = () => {
     setForm({ label: "", type: "PERCENTAGE", value: 0, startDate: "", endDate: "", isActive: true });
@@ -130,26 +120,6 @@ export default function Index() {
     setEditing(null);
     };
 
-//   const save = () => {
-//     if (!form.label.trim()) {
-//       toast.error("Please enter a label");
-//       return;
-//     }
-//     if (form.value <= 0 || Number.isNaN(form.value)) {
-//       toast.error("Please enter a valid value");
-//       return;
-//     }
-
-//     if (editing) {
-//       setDiscounts((prev) => prev.map((d) => (d.id === editing.id ? { ...editing, ...form } : d)));
-//       toast.success("Discount updated");
-//     } else {
-//       setDiscounts((prev) => [...prev, { ...form, id: Date.now().toString() }]);
-//       toast.success("Discount created");
-//     }
-//     setOpen(false);
-//     setEditing(null);
-//   };
 
   const remove = (id: string) => {
     if (!confirm("Are you sure you want to delete this discount?")) return;

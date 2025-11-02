@@ -2,21 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import PopularProductCard from "app/components/PopularProductCard/PopularProductCard";
+import type { Product } from "store/product/productTypes";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice: number;
-  image: string;
-  rating: number;
-  reviews: number;
-  badge: string;
-  weight: string;
-  farm: string;
-  freshness: string;
-  description: string;
-}
 
 interface Props {
   products: Product[];
@@ -77,7 +64,7 @@ const ProductSlider = ({ products }: Props) => {
           animating ? "transform translate-x-0" : ""
         }`}
       >
-        {getVisibleProducts()?.map((product, index) =>
+        {getVisibleProducts()?.map((product) =>
           product?.id ? (
             <div
               key={product.id}

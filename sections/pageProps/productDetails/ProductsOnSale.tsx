@@ -1,77 +1,44 @@
 'use client';
-import React from "react";
-import Badge from "app/components/Badge/Badge";
-import Button from "app/components/Button/Button";
-import { ShoppingCart, Star } from "lucide-react";
+import React, { useEffect, useMemo } from 'react';
+import { useProductStore } from 'store/product/useProductStore';
+import ProductCard from 'app/components/ProductCard/ProductCard';
+import { motion } from 'framer-motion';
+import Button from 'app/components/Button/Button';
 
-const productsOnSale = [
-  {
-    id: "ghT-06Qv-90V-004",
-    name: "Fresh Fish",
-    description: "Freshly caught fish.",
-    image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=300&fit=crop",
-    priceInKobo: 270000,
-    originalPrice: 360000,
-    rating: 4.5,
-    category: "Seafood"
-  },
-  {
-    id: "ghT-06Qv-90V-003",
-    name: "6kg Spiced Crabs",
-    description: "Delicious and spiced crabs.",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=300&fit=crop",
-    priceInKobo: 600000,
-    originalPrice: 750000,
-    rating: 4.8,
-    category: "Seafood"
-  },
-  {
-    id: "ghT-06Qv-90V-002",
-    name: "4kg Fresh Shrimps",
-    description: "High-quality fresh shrimps.",
-    image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=300&fit=crop",
-    priceInKobo: 350000,
-    originalPrice: 450000,
-    rating: 4.6,
-    category: "Seafood"
-  },
-  {
-    id: "ghT-06Qv-90V-001",
-    name: "Basket of Tomatoes",
-    description: "Organic and fresh tomatoes.",
-    image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&h=300&fit=crop",
-    priceInKobo: 250000,
-    originalPrice: 320000,
-    rating: 4.7,
-    category: "Vegetables"
-  },
-  {
-    id: "ghT-06Qv-90V-000",
-    name: "2kg Red Beef",
-    description: "Freshly cut premium red beef.",
-    image: "https://images.unsplash.com/photo-1588347818108-9d6c0c9d3c86?w=400&h=300&fit=crop",
-    priceInKobo: 300000,
-    originalPrice: 400000,
-    rating: 4.9,
-    category: "Meat"
+// Utility to shuffle array without mutating the original
+const shuffleArray = <T,>(arr: T[]): T[] => {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-];
+  return copy;
+};
 
 const ProductsOnSale = () => {
-  const formatCurrency = (priceInKobo: number) => `₦${(priceInKobo / 100).toLocaleString()}`;
-  const getDiscountPercentage = (original: number, current: number) =>
-    Math.round(((original - current) / original) * 100);
+  const products = useProductStore((state) => state.products);
+  const fetchProducts = useProductStore((state) => state.fetchProducts);
+  const isLoading = useProductStore((state) => state.isLoading);
 
-  const renderStars = (rating: number) => (
-    <div className="flex gap-0.5">
-      {[...Array(5)].map((_, i) => (
-        <Star
-          key={i}
-          className={`w-3 h-3 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "fill-none text-gray-300"}`}
-        />
-      ))}
-    </div>
+
+  useEffect(() => {
+    if (!products?.length) fetchProducts();
+  }, [products, fetchProducts]);
+
+  // Shuffle once per render, keep it memoized so it doesn't keep reordering
+  const randomizedProducts = useMemo(
+    () => shuffleArray(products || []).slice(0, 5),
+    [products]
   );
+
+
+  if (isLoading || !products?.length) {
+    return (
+      <div className="text-center mt-10 text-gray-600">
+        Fetching hot deals...
+      </div>
+    );
+  }
 
   return (
     <div className="py-8 max-w-7xl mx-auto px-4">
@@ -79,53 +46,29 @@ const ProductsOnSale = () => {
         <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
           Products on Sale
         </h3>
-        <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs">Hot Deals</Badge>
+        <span className="px-2 py-1 text-xs rounded-lg bg-gradient-to-r from-red-500 to-pink-500 text-white">
+          Hot Deals
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
-        {productsOnSale.map((item) => (
-          <div
+      <motion.div
+        layout
+        className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5"
+      >
+        {randomizedProducts.map((item) => (
+          <ProductCard
             key={item.id}
-            className="group bg-white rounded-3xl overflow-hidden border border-gray-200/30 shadow hover:shadow-lg transition cursor-pointer"
-          >
-            <div className="relative w-full aspect-square overflow-hidden">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-              />
-              <div className="absolute top-2 left-2">
-                <Badge className="bg-red-500 text-white text-xs px-1 py-0.5">
-                  -{getDiscountPercentage(item.originalPrice, item.priceInKobo)}%
-                </Badge>
-              </div>
-            </div>
-
-            <div className="p-3 flex flex-col gap-1">
-              <h4 className="text-sm font-semibold text-gray-800 group-hover:text-green-600 transition-colors truncate">
-                {item.name}
-              </h4>
-              <p className="text-xs text-gray-500 line-clamp-2">{item.description}</p>
-              <div className="flex items-center justify-between mt-1">
-                {renderStars(item.rating)}
-                <span className="text-xs text-gray-600">{item.rating}</span>
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex flex-col">
-                  <span className="text-green-600 font-bold text-sm">{formatCurrency(item.priceInKobo)}</span>
-                  <span className="text-gray-400 text-xs line-through">{formatCurrency(item.originalPrice)}</span>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-green-500 hover:bg-green-600 text-white shadow-lg px-2 py-1 h-6 text-xs"
-                >
-                  <ShoppingCart className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          </div>
+            id={item.id}
+            productName={item.productName}
+            description={item.description}
+            image={item.images?.[0]?.url || "/placeholder.png"}
+            priceInKobo={item.priceInKobo}
+            rating={item.rating}
+            unitType={item.unitType || 'each'}
+            isFavorite={item.isFavorite || false}
+          />
         ))}
-      </div>
+      </motion.div>
 
       <div className="mt-6 text-center">
         <Button

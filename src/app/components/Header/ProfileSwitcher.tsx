@@ -37,7 +37,7 @@ const UserIcon = ({  badgeCount = 0 }: UserIconProps) => {
           </div>
         )}
       </div>
-      <span className="text-lg text-gradient-to-r from-green-600 to-emerald-700 font-medium transition-colors duration-300">
+      <span className="text-lg md:block hidden text-gradient-to-r from-green-600 to-emerald-700 font-medium transition-colors duration-300">
         Hi <span className=''>{firstName}!</span>
       </span>
     </Link>

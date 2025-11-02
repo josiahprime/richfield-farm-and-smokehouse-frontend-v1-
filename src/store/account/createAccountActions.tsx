@@ -1,11 +1,14 @@
 import axiosInstance from "lib/axios";
+import { AxiosError } from "axios";
 
 export const updateNameApi = async (userId: string, username: string) => {
   try {
     const res = await axiosInstance.post("/account/update-username", { userId, username });
     return res.data;
   } catch (err) {
-    throw new Error("Error updating username");
+    const error = err as AxiosError<{ error: string }>;
+    console.error("[API] updateNameApi failed:", error.response?.data || error.message);
+    throw err
   }
 };
 
@@ -15,8 +18,9 @@ export const updateEmailApi = async (userId: string, newEmail: string) => {
     const res = await axiosInstance.post("/account/update-email", { userId, newEmail });
     console.log("[API] updateEmailApi success:", res.data);
     return res.data; // success message
-  } catch (err: any) {
-    console.error("[API] updateEmailApi failed:", err.response?.data || err.message);
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    console.error("[API] updateEmailApi failed:", error.response?.data || error.message);
     // Throw the original Axios error so the frontend can read response.data
     throw err;
   }
@@ -31,7 +35,8 @@ export const updatePhoneApi = async (userId: string, phone: string) => {
     console.log('response from update  phone api', res)
     return res.data;
   } catch (err) {
-    throw new Error("Error updating phone");
+    const error = err as AxiosError<{ error: string }>;
+    console.error("[API] updatePhoneApi failed:", error.response?.data || error.message);
   }
 };
 
@@ -49,8 +54,9 @@ export const updateAddressApi = async (data: {
     const res = await axiosInstance.post("/account/update-address", data);
     console.log("[API] updateAddressApi success:", res.data);
     return res.data;
-  } catch (err: any) {
-    console.error("[API] updateAddressApi failed:", err.response?.data || err.message);
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    console.error("[API] updateAddressApi failed:", error.response?.data || error.message);
     throw err;
   }
 };
@@ -66,7 +72,8 @@ export const updatePasswordApi = async (currentPassword: string, newPassword: st
     });
     return res.data;
   } catch (err) {
-    throw new Error("Error updating password");
+    const error = err as AxiosError<{ error: string }>;
+    console.error("[API] updateEmailApi failed:", error.response?.data || error.message);
   }
 };
 
@@ -75,8 +82,9 @@ export const fetchAddressApi = async () => {
     const res = await axiosInstance.get("/account/address"); // your GET endpoint
     console.log("[API] fetchAddressApi success:", res.data);
     return res.data; // { address: {...} }
-  } catch (err: any) {
-    console.error("[API] fetchAddressApi failed:", err.response?.data || err.message);
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    console.error("[API] fetchAddressApi failed:", error.response?.data || error.message);
     throw err;
   }
 };

@@ -1,7 +1,7 @@
 // authStore.ts
 
 import { create } from 'zustand';
-import { ProductState, ProductSlice } from './productTypes';
+import { ProductState} from './productTypes';
 import { createProductActions } from './createProductActions';
 
 

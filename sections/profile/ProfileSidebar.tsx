@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from "next/navigation";
-import Button from "app/components/Button/Button";
 import {
   User,
   Package,
@@ -17,7 +16,7 @@ import {
   Mail,
   LogOut,
 } from "lucide-react";
-import { ProfileSection } from "@/pages/Profile";
+import { ProfileSection } from "app/(public)/account/page";
 import { useAuthStore } from "store/auth/useAuthStore";
 
 interface ProfileSidebarProps {
@@ -42,12 +41,15 @@ export function ProfileSidebar({ activeSection, onSectionChange }: ProfileSideba
     { id: "account" as ProfileSection, label: "My Account", icon: User },
     { id: "orders" as ProfileSection, label: "Orders", icon: Package },
     { id: "notifications" as ProfileSection, label: "Notifications", icon: MessageSquare },
+    { id: "wishlist" as ProfileSection, label: "Wishlist", icon: Heart },
+    { id: "management" as ProfileSection, label: "Account Management", icon: Settings },
+    
     { id: "reviews" as ProfileSection, label: "Pending Reviews", icon: Star },
     { id: "voucher" as ProfileSection, label: "Voucher", icon: Ticket },
-    { id: "wishlist" as ProfileSection, label: "Wishlist", icon: Heart },
+    
     { id: "sellers" as ProfileSection, label: "Followed Sellers", icon: Users },
     { id: "recent" as ProfileSection, label: "Recently Viewed", icon: Clock },
-    { id: "management" as ProfileSection, label: "Account Management", icon: Settings },
+    
     { id: "payment" as ProfileSection, label: "Payment Settings", icon: CreditCard },
     { id: "address" as ProfileSection, label: "Address Book", icon: MapPin },
     { id: "newsletter" as ProfileSection, label: "Newsletter Preferences", icon: Mail },

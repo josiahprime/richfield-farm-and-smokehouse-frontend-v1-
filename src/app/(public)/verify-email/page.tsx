@@ -93,7 +93,7 @@ const VerifyEmail = () => {
         style={{ backgroundImage: "url(/images/logout.jpg)" }}
       >
         <div className="flex flex-col justify-center h-full text-white p-12">
-          <h1 className="text-4xl font-bold mb-4">You're Almost There!</h1>
+          <h1 className="text-4xl font-bold mb-4">You&apos;re Almost There!</h1>
           <p className="text-lg">
             Secure your account and unlock a world of opportunities.
           </p>

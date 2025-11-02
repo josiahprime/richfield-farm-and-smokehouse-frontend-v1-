@@ -1,7 +1,8 @@
-import { StateCreator, StoreApi } from "zustand";
+import { StateCreator } from "zustand";
 import { OrderState, OrderActions, OrderStatus } from "./orderTypes";
 import { axiosInstance } from "../../lib/axios";
 import axios from "axios";
+import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
 export const createOrderActions: StateCreator<
@@ -9,7 +10,7 @@ export const createOrderActions: StateCreator<
   [],
   [],
   OrderState & OrderActions
-> = (set, get, _store) => ({
+> = (set, get) => ({
   orders: [],
   cartItems: [],
   selectedOrder: null,
@@ -32,8 +33,10 @@ export const createOrderActions: StateCreator<
 
       set({ preview: res.data, loading: false });
       toast.success("order calculated successfully");
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
+      return res.data;
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      set({ error: error.message, loading: false });
     }
   },
 
@@ -45,9 +48,10 @@ export const createOrderActions: StateCreator<
       const res = await axiosInstance.get("/orders/get-orders");
       console.log('response',res)
       set({ orders: res.data, loading: false });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       set({
-        error: err?.message || "Error fetching orders",
+        error: error?.message|| "Error fetching orders",
         loading: false,
       });
     }
@@ -58,9 +62,10 @@ export const createOrderActions: StateCreator<
     try {
       const res = await axios.get(`/api/orders/${id}`);
       set({ selectedOrder: res.data.order, loading: false });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       set({
-        error: err?.message || "Error fetching order",
+        error: error?.message || "Error fetching order",
         loading: false,
       });
     }
@@ -73,9 +78,10 @@ export const createOrderActions: StateCreator<
     try {
       const res = await axiosInstance.get("/orders/my");
       set({ userOrders: res.data, loading: false }); // ✅ Store in userOrders
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       set({
-        error: err?.message || "Error fetching user orders",
+        error: error?.message || "Error fetching user orders",
         loading: false,
       });
     }
@@ -106,9 +112,10 @@ export const createOrderActions: StateCreator<
       console.log("✅ Order updated in Zustand store:", res.data.order);
       toast.success("Order fulfillment status updated successfully");
       return true;
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       toast.error(
-        error.response?.data?.message || "Order fulfillment update failed"
+        error.response?.data?.error || "Order fulfillment update failed"
       );
       console.error("Update failed:", error);
       return false;

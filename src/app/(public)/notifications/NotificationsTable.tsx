@@ -17,6 +17,14 @@ import {
 } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
 
+interface Message {
+  id: number;
+  from: string;
+  subject: string;
+  message: string;
+  time: string;
+}
+
 const getIcon = (type: string) => {
   switch (type) {
     case "order":
@@ -56,7 +64,7 @@ const NotificationsPage = () => {
   ];
 
   const [messages] = useState(mockMessages);
-  const [activeMessage, setActiveMessage] = useState(null);
+  const [activeMessage, setActiveMessage] =  useState<Message | null>(null);
   const authUser = useAuthStore((state) => state.authUser);
   const notifications = useNotificationsStore((state) => state.notifications);
   const fetchNotifications = useNotificationsStore((state) => state.fetchNotifications);
@@ -74,7 +82,7 @@ const NotificationsPage = () => {
     load();
     const cleanup = connectSocket(authUser.id);
     return () => cleanup();
-  }, [authUser]);
+  }, [authUser, fetchNotifications, connectSocket]);
 
   const closeModal = () => setActiveMessage(null);
 

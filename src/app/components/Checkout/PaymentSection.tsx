@@ -1,3 +1,4 @@
+'use client'
 import { CreditCard, Shield, ArrowLeft, Loader2 } from "lucide-react";
 import { useOrderStore } from "store/order/useOrderStore";
 import { formatCurrency } from "utils/FormatCurrency";
@@ -9,7 +10,7 @@ interface PaymentSectionProps {
   onBack: () => void;
 }
 
-const PaymentSection = ({ amount, isPaying, handleSubmit, onBack }: PaymentSectionProps) => {
+const PaymentSection = ({isPaying, handleSubmit, onBack }: PaymentSectionProps) => {
   const preview = useOrderStore((state)=>(state.preview))
 
   return (
@@ -60,7 +61,7 @@ const PaymentSection = ({ amount, isPaying, handleSubmit, onBack }: PaymentSecti
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-200">
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold text-gray-900">Total Amount</span>
-            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent">
+            <span className="md:text-2xl text-xl  font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent">
               {formatCurrency(preview?.total)}
             </span>
           </div>
@@ -71,7 +72,7 @@ const PaymentSection = ({ amount, isPaying, handleSubmit, onBack }: PaymentSecti
           <button
             type="button"
             onClick={onBack}
-            className="flex-1 bg-gray-100 text-gray-700 py-4 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+            className="flex-1 bg-gray-100 text-gray-700 md:py-4 py-2 md:px-8 px-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
@@ -80,7 +81,7 @@ const PaymentSection = ({ amount, isPaying, handleSubmit, onBack }: PaymentSecti
           <button
             type="submit"
             disabled={isPaying}
-            className="flex-2  bg-gradient-to-r from-green-600 to-emerald-700 text-white py-4 px-8 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="flex-2  bg-gradient-to-r from-green-600 to-emerald-700 text-white md:py-4 py-2 md:px-8 px-4  rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {isPaying ? (
               <>

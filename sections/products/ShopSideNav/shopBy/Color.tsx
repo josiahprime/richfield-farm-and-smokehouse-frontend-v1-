@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Drumstick,
   Fish,
@@ -9,28 +9,42 @@ import {
   Cookie,
   ChevronDown,
   ChevronUp,
+  Grid,
 } from 'lucide-react';
-import { useProductStore } from 'store/product/useProductStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const brands = [
+  { _id: 0, title: 'All Products', slug: '', icon: <Grid size={18} /> },
   { _id: 9006, title: 'Meat & Poultry', slug: 'meat-poultry', icon: <Drumstick size={18} /> },
-  { _id: 9009, title: 'Fresh Produce', slug: 'fresh-produce', icon: <Wheat size={18} /> }, // Wheat works nicely
+  { _id: 9009, title: 'Fresh Produce', slug: 'fresh-produce', icon: <Wheat size={18} /> },
   { _id: 9010, title: 'Fish & Seafoods', slug: 'fish-seafoods', icon: <Fish size={18} /> },
   { _id: 9011, title: 'Dairy & Eggs', slug: 'dairy-eggs', icon: <Egg size={18} /> },
   { _id: 9012, title: 'Animal Feeds & Supplements', slug: 'animal-feeds-supplements', icon: <Wheat size={18} /> },
   { _id: 9013, title: 'Pantry & Sweeteners', slug: 'pantry-sweeteners', icon: <Cookie size={18} /> },
 ];
 
-
 const ProductTagSidebar: React.FC = () => {
-  const fetchProducts = useProductStore((state) => state.fetchProducts);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTag, setActiveTag] = useState('');
   const [isOpen, setIsOpen] = useState(true);
 
+  // Load active tag from URL on mount
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    setActiveTag(categoryFromUrl || ''); // ✅ resets to '' when there's no category
+  }, [searchParams]);
+
   const handleFilter = (category: string) => {
     setActiveTag(category);
-    fetchProducts({ category });
+
+    if (category) {
+      router.push(`/products?category=${category}`);
+    } else {
+      // ✅ go back to all products (no category in URL)
+      router.push('/products');
+    }
   };
 
   return (
@@ -64,7 +78,7 @@ const ProductTagSidebar: React.FC = () => {
                 className={`cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg duration-300
                   ${
                     activeTag === item.slug
-                      ? 'bg-primeColor text-white'
+                      ? 'bg-primeColor text-gray-600 bg-gray-200'
                       : 'hover:bg-gray-100 hover:text-primeColor text-gray-800'
                   }`}
               >

@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
+import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Copy, Truck } from "lucide-react";
+import { Search } from "lucide-react";
 import { formatCurrency } from "utils/FormatCurrency";
 import { useOrderStore } from "store/order/useOrderStore";
+import { InfiniteScroll } from "app/components/InfiniteScroll";
+import Image from "next/image";
 
 export default function OrdersContent() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,7 +20,7 @@ export default function OrdersContent() {
 
   useEffect(() => {
     if (userOrders.length === 0) getUserOrders();
-  }, []);
+  }, [getUserOrders, userOrders.length]);
 
   const filteredOrders = userOrders.filter((order) => {
     const matchSearch =
@@ -42,40 +45,47 @@ export default function OrdersContent() {
     }
   };
 
+
+
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-100 p-6 shadow-sm border border-emerald-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 p-6 shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
-          <p className="text-gray-600 text-sm">Track, manage and review your recent purchases.</p>
+          <h1 className="text-2xl font-bold text-white">My Orders</h1>
+          <p className="text-white/80 text-sm">Track, manage, and review your recent purchases.</p>
         </div>
-        <button className="text-sm text-blue-600 font-medium hover:underline">
+        <button className="text-sm text-white/80 font-medium hover:underline">
           Deleted Orders
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-        {[
-          { label: "All", value: "all" },
-          { label: "Processing", value: "processing" },
-          { label: "Shipped", value: "shipped" },
-          { label: "Delivered", value: "delivered" },
-          { label: "Completed", value: "completed" },
-        ].map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={`py-3 text-sm font-medium transition-all ${
-              activeTab === tab.value
-                ? "bg-green-600 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="w-full">
+        <div className="flex sm:grid sm:grid-cols-5 gap-2 sm:gap-0 overflow-x-auto scrollbar-hide rounded-2xl border border-gray-200 shadow-sm bg-white p-2 sm:p-0">
+          {[
+            { label: "All", value: "all" },
+            { label: "Processing", value: "processing" },
+            { label: "Shipped", value: "shipped" },
+            { label: "Delivered", value: "delivered" },
+            { label: "Completed", value: "completed" },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => {
+                setActiveTab(tab.value);
+              }}
+              className={`flex-shrink-0 px-4 py-2 sm:py-3 text-sm sm:text-base font-medium rounded-full sm:rounded-none transition-all whitespace-nowrap 
+                ${
+                  activeTab === tab.value
+                    ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md sm:border-b-2 sm:border-emerald-600"
+                    : "bg-gray-50 text-gray-600 hover:bg-gray-100 sm:bg-white sm:hover:bg-gray-50"
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -87,7 +97,7 @@ export default function OrdersContent() {
             placeholder="Search by order ID or product"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-3 w-full h-11 rounded-xl border border-gray-200 bg-gray-50 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="pl-10 pr-3 w-full h-11 rounded-xl border border-gray-200 bg-gray-50 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
         <button className="border border-gray-200 text-sm rounded-xl px-4 py-2 bg-white hover:bg-gray-100">
@@ -102,89 +112,95 @@ export default function OrdersContent() {
             No orders found.
           </div>
         ) : (
-          filteredOrders.map((order) => (
-            <div
-              key={order.id}
-              className="relative group border border-gray-200 rounded-3xl p-6 backdrop-blur-md bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all hover:-translate-y-1"
-            >
-              {/* Status & Meta */}
-              <div className="flex flex-wrap justify-between items-center mb-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${getStatusChip(
-                      order.fulfillmentStatus
-                    )}`}
-                  >
-                    {order.fulfillmentStatus.toUpperCase()}
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    Order #{order.id.slice(0, 8).toUpperCase()}
-                  </span>
-                </div>
-                <button
-                  onClick={() =>
-                    router.push(`/account?section=${currentSection}&id=${order.id}`)
-                  }
-                  className="text-green-700 text-sm font-medium hover:underline"
+          <>
+            <InfiniteScroll
+              key={activeTab + searchQuery} 
+              items={filteredOrders}
+              initialItems={4} // show 4 initially
+              loadCount={4} // load 4 more each scroll
+              renderItem={(order) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                  key={order.id}
+                  className="relative group border border-gray-200 rounded-3xl p-6 backdrop-blur-md bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all hover:-translate-y-1"
                 >
-                  View Details →
-                </button>
-              </div>
+                  {/* Status & Meta */}
+                  <div className="flex flex-wrap justify-between items-center mb-6">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${getStatusChip(
+                          order.fulfillmentStatus
+                        )}`}
+                      >
+                        {order.fulfillmentStatus.toUpperCase()}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        Order #{order.id.slice(0, 8).toUpperCase()}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() =>
+                        router.push(`/account?section=${currentSection}&id=${order.id}`)
+                      }
+                      className="text-emerald-700 text-sm font-medium hover:underline"
+                    >
+                      View Details →
+                    </button>
+                  </div>
 
-              {/* Order Items */}
-              <div className="flex flex-col gap-5">
-                {order.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-4 items-center bg-gradient-to-r from-gray-50/50 to-gray-100/30 rounded-2xl p-4 border border-gray-100"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.productName}
-                      className="w-20 h-20 object-cover rounded-xl border"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-base font-semibold text-gray-900 mb-1">
-                        {item.productName}
-                      </h4>
-                      <p className="text-sm text-gray-500 mb-1">Qty: {item.quantity}</p>
-                      <p className="text-green-700 font-bold text-lg">
-                        {formatCurrency(item.priceInKobo)}
-                      </p>
+                  {/* Order Items */}
+                  <div className="flex flex-col gap-5">
+                    {order.items.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex gap-4 items-center bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition"
+                      >
+                        <Image
+                          src={item.image?.url || "/placeholder.jpg"}
+                          alt={item.productName || "Product image"}
+                          width={80}
+                          height={80}
+                          className="object-cover rounded-xl border"
+                        />
+                        <div className="flex-1">
+                          <h4 className="text-base font-semibold text-gray-900 mb-1">
+                            {item.productName}
+                          </h4>
+                          <p className="text-sm text-gray-500 mb-1">Qty: {item.quantity}</p>
+                          <p className="text-emerald-700 font-bold text-lg">
+                            {formatCurrency(item.priceInKobo)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+                    <div className="flex gap-3">
+                      {order.fulfillmentStatus === "delivered" ? (
+                        <>
+                          <button className="bg-emerald-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-emerald-700 transition">
+                            Buy Again
+                          </button>
+                          <button className="border border-gray-300 px-5 py-2 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">
+                            Remove
+                          </button>
+                        </>
+                      ) : (
+                        <button className="border border-gray-300 px-5 py-2 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">
+                          Track Order
+                        </button>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Footer */}
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Truck className="w-4 h-4" />
-                  Estimated Delivery:{" "}
-                  <span className="text-gray-700 font-medium">
-                    {order.deliveryEstimate || "Processing"}
-                  </span>
-                </div>
-
-                <div className="flex gap-3">
-                  {order.fulfillmentStatus === "delivered" ? (
-                    <>
-                      <button className="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-green-700 transition">
-                        Buy Again
-                      </button>
-                      <button className="border border-gray-300 px-5 py-2 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">
-                        Remove
-                      </button>
-                    </>
-                  ) : (
-                    <button className="border border-gray-300 px-5 py-2 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">
-                      Track Order
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))
+                </motion.div>
+              )}
+            />
+          </>
         )}
       </div>
     </div>

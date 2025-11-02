@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, Star, ChevronLeft } from "lucide-react";
-import Link from 'next/navigation'
+import Link from "next/link";
+
 
 interface Review {
   name: string;

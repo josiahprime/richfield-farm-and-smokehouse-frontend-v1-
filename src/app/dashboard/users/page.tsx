@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FaUserPlus, FaUserShield, FaUserTie, FaBan,} from "react-icons/fa";
 import { FiMoreVertical } from "react-icons/fi";
 import { HiUserRemove } from "react-icons/hi";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import ReactPaginate from "react-paginate";
 import DropdownPortal from "app/components/DropdownPortal/DropdownPortal";
 import ConfirmPortal from "app/components/ConfirmPortal/ConfirmPortal";
@@ -57,10 +57,16 @@ const UsersPage = () => {
     banSelectedUser(userId)
   )
 
+  // useEffect(() => {
+  //   fetchUsers();
+  //   fetchCurrentUser()
+  // }, []);
+
   useEffect(() => {
-    fetchUsers();
-    fetchCurrentUser()
-  }, []);
+      fetchUsers();
+      fetchCurrentUser();
+    }, [fetchUsers, fetchCurrentUser]);
+
 
   console.log(currentUser)
 
@@ -214,7 +220,11 @@ const UsersPage = () => {
                   {currentUser && user.id !== currentUser.id &&  (
                     <>
                       <button
-                        ref={(el) => (btnRefs.current[user.id] = el)}
+                        // ref={(el) => (btnRefs.current[user.id] = el)}
+                        ref={(el): void => {
+                          btnRefs.current[user.id] = el;
+                        }}
+
                         onClick={() =>
                           setMenuOpen(menuOpen === user.id ? null : user.id)
                         }

@@ -1,20 +1,23 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProfileSidebar } from "../../../../sections/profile/ProfileSidebar";
 import { ProfileContent } from "../../../../sections/profile/ProfileContent";
+import {
+} from "lucide-react";
+import ProfileMobile from "../../../../sections/profile/ProfileMobile";
 
-export type ProfileSection = 
+export type ProfileSection =
   | "account"
-  | "orders" 
+  | "orders"
   | "notifications"
+  | "wishlist"
+  | "management"
   | "reviews"
   | "voucher"
-  | "wishlist"
   | "sellers"
   | "recent"
-  | "management"
   | "payment"
   | "address"
   | "newsletter";
@@ -26,36 +29,52 @@ const Profile = () => {
   const searchParams = useSearchParams();
   const sectionFromUrl = searchParams.get("section") as ProfileSection | null;
 
-  const [activeSection, setActiveSection] = useState<ProfileSection>(DEFAULT_SECTION);
+  const [activeSection, setActiveSection] =
+    useState<ProfileSection>(DEFAULT_SECTION);
 
-  // Update section from URL on mount
   useEffect(() => {
-    if (sectionFromUrl && sectionFromUrl !== activeSection) {
-      setActiveSection(sectionFromUrl);
+    if (sectionFromUrl) {
+      setActiveSection((prev) =>
+        prev !== sectionFromUrl ? sectionFromUrl : prev
+      );
     }
   }, [sectionFromUrl]);
 
+  const handleSectionChange = (section: ProfileSection) => {
+    setActiveSection(section);
+    router.push(`/account?section=${section}`);
+  };
+
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="w-80 flex-shrink-0">
+    <div className="container mx-auto md:px-4 md:py-8 ">
+      
+
+      {/* ===== MAIN LAYOUT ===== */}
+      <div className="flex-col md:flex-row gap-6 hidden md:flex">
+        {/* Sidebar (Desktop only) */}
+        <div className="hidden md:block w-80 flex-shrink-0">
           <ProfileSidebar
             activeSection={activeSection}
-            onSectionChange={(section) => {
-              setActiveSection(section);
-              router.push(`/account?section=${section}`);
-            }}
+            onSectionChange={handleSectionChange}
           />
         </div>
+
+        
 
         {/* Content */}
         <div className="flex-1">
           <ProfileContent activeSection={activeSection} />
         </div>
       </div>
+
+      <div className="md:hidden block">
+        <ProfileMobile/>
+      </div>
     </div>
   );
-};
+}
+
 
 export default Profile;
+

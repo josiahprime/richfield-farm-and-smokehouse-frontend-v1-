@@ -7,20 +7,35 @@ import { useCartStore } from "store/cart/useCartStore";
 import { useProductStore } from "store/product/useProductStore";
 import { useAuthStore } from "store/auth/useAuthStore";
 import Badge from "app/components/Badge/Badge";
+import type { Product } from "store/product/productTypes";
 
-const ProductInfo = ({ productInfo }) => {
+
+interface ProductInfoProps {
+  productInfo: Product;
+}
+
+  const ProductInfo: React.FC<ProductInfoProps> = ({ productInfo }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [index, setIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
 
-  const [selectedImage, setSelectedImage] = useState(productInfo.images[0].url);
+  const [selectedImage, setSelectedImage] = useState<string>("");
+
+  
+
   const userId = useAuthStore((state)=>state.authUser?.id)
   const addToCart = useCartStore((state) => state.addToCart);
 
 
   const favorites = useProductStore((state)=> state.favorites)
   const toggleFavorites = useProductStore((state)=>state.toggleFavorite)
+
+  useEffect(() => {
+    if (productInfo.images[0]?.url) {
+      setSelectedImage(productInfo.images[0].url);
+    }
+  }, [productInfo.images]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,8 +45,9 @@ const ProductInfo = ({ productInfo }) => {
   }, [productInfo.images.length]);
 
   useEffect(() => {
-    setSelectedImage(productInfo.images[index]);
+    setSelectedImage(productInfo.images[index]?.url || "");
   }, [index, productInfo.images]);
+
 
    useEffect(() => {
     // ✅ Check if the product is already in favorites
@@ -47,20 +63,27 @@ const ProductInfo = ({ productInfo }) => {
 
   // ✅ FIXED FUNCTION
   const handleAddToCart = () => {
-    const product = {
-      id: productInfo.id,
+    addToCart({
+      id: productInfo.id,           // satisfies CartItem.id
+      productId: productInfo.id,    // backend-friendly field
       productName: productInfo.productName,
-      image: productInfo.images?.[0]?.url,
+      image: productInfo.images?.[0]?.url || "", // avoid empty src errors
       priceInKobo: productInfo.priceInKobo,
       quantity,
       unitType: productInfo.unitType,
-    };
+    });
 
-    addToCart(product);
     toast.success(`${productInfo.productName} added to cart!`);
   };
 
-    const handleWishlist = async () => {
+
+
+  const handleWishlist = async () => {
+    if (!userId) {
+      toast.error("You must be logged in to add to wishlist");
+      return;
+    }
+
     try {
       await toggleFavorites(userId, productInfo.id);
       setIsFavorite(!isFavorite);
@@ -76,12 +99,13 @@ const ProductInfo = ({ productInfo }) => {
   };
 
 
+
   
 
   const nextImage = () => setIndex((index + 1) % productInfo.images.length);
   const prevImage = () => setIndex(index === 0 ? productInfo.images.length - 1 : index - 1);
 
-  const renderStars = (rating) => (
+  const renderStars = (rating: number) => (
     <div className="flex gap-1">
       {[...Array(5)].map((_, i) => (
         <Star
@@ -100,11 +124,14 @@ const ProductInfo = ({ productInfo }) => {
           {/* Product Gallery */}
           <div className="space-y-4">
             <div className="relative group rounded-2xl shadow-neumorphic overflow-hidden">
-              <img
-                src={selectedImage.url}
-                alt={productInfo.productName}
-                className="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              {selectedImage ? (
+                <img
+                  src={selectedImage}
+                  alt={productInfo.productName}
+                  className="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : null}
+
 
               {/* Navigation */}
               <button
@@ -134,11 +161,12 @@ const ProductInfo = ({ productInfo }) => {
                 <button
                   key={i}
                   onClick={() => {
-                    setSelectedImage(img);
+                    setSelectedImage(img.url || "");
                     setIndex(i);
                   }}
+
                   className={`rounded-lg transition-all duration-300 hover:scale-105 ${
-                    selectedImage === img ? "ring-2 ring-green-500 shadow-lg" : "ring-1 ring-gray-200 hover:ring-gray-300"
+                    selectedImage === img.url ? "ring-2 ring-green-500 shadow-lg" : "ring-1 ring-gray-200 hover:ring-gray-300"
                   }`}
                 >
                   <img src={img.url} alt="Thumbnail" className="w-12 h-12 object-cover rounded-lg" />
@@ -166,12 +194,13 @@ const ProductInfo = ({ productInfo }) => {
               {productInfo.productName}
             </h1>
 
-            <div className="flex items-center gap-2">
-              {renderStars(productInfo.rating)}
-              <span className="text-xs font-medium text-gray-600">
-                {productInfo.rating} ({productInfo.reviewsCount} reviews)
-              </span>
-            </div>
+              <div className="flex items-center gap-2">
+                {renderStars(productInfo.rating ?? 0)}
+                <span className="text-xs font-medium text-gray-600">
+                  {productInfo.rating ?? 0}
+                </span>
+              </div>
+
 
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
@@ -188,18 +217,18 @@ const ProductInfo = ({ productInfo }) => {
             <p className="text-gray-600 leading-relaxed text-xs">{productInfo.description}</p>
 
             <div className="grid grid-cols-2 gap-2 p-3 rounded-xl shadow-neumorphic border border-gray-200/50 bg-white/80">
-              <div>
+              {/* <div>
                 <span className="text-xs font-semibold text-gray-700">Brand:</span>
                 <p className="text-gray-600 text-xs">{productInfo.brand}</p>
-              </div>
+              </div> */}
               <div>
                 <span className="text-xs font-semibold text-gray-700">Category:</span>
                 <p className="text-gray-600 text-xs">{productInfo.category}</p>
               </div>
-              <div>
+              {/* <div>
                 <span className="text-xs font-semibold text-gray-700">Weight:</span>
                 <p className="text-gray-600 text-xs">{productInfo.weight}</p>
-              </div>
+              </div> */}
               <div>
                 <span className="text-xs font-semibold text-gray-700">Stock:</span>
                 <p className="text-green-600 font-medium text-xs">In Stock</p>
@@ -241,14 +270,17 @@ const ProductInfo = ({ productInfo }) => {
 
                 <Button
                   onClick={handleWishlist}
-                  variant={isFavorite ? "filled" : "outline"}
+                  variant="outline" // always a valid variant
                   className={`flex-1 py-2 rounded-xl border-2 transition-all duration-300 text-xs flex items-center justify-center ${
-                    isFavorite ? "bg-red-50 border-red-200 text-red-600" : "hover:bg-gray-50 border-gray-300"
+                    isFavorite
+                      ? "bg-red-50 border-red-200 text-red-600" // "filled" style
+                      : "hover:bg-gray-50 border-gray-300"
                   }`}
                 >
                   <Heart className={`w-3 h-3 mr-1 ${isFavorite ? "fill-current text-red-500" : ""}`} />
                   {isFavorite ? "In Wishlist" : "Add to Wishlist"}
                 </Button>
+
                 <Button variant="outline" className="px-2 py-2 rounded-xl border-2 border-gray-300 hover:bg-gray-50 transition-all">
                   <Share2 className="w-3 h-3" />
                 </Button>

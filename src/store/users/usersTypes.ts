@@ -7,6 +7,7 @@ export interface User {
   authProvider: string;
   profilePic: string;
   createdAt: string;
+  phone?: string;
 }
 
 export interface UserSlice {

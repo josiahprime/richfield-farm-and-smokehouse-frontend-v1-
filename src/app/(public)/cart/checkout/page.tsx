@@ -9,6 +9,9 @@ import OrderSummary from "app/components/Checkout/OrderSummary";
 import ShippingForm from "app/components/Checkout/ShippingForm";
 import PaymentSection from "app/components/Checkout/PaymentSection";
 import { useOrderStore } from "store/order/useOrderStore";
+import { CheckoutRequestPayload } from "store/checkout/checkoutTypes";
+
+
 
 
 
@@ -21,12 +24,19 @@ const CheckoutPage = () => {
   const cartItems = useCartStore((state) => state.items);
   const previewOrder = useOrderStore((state)=>(state.previewOrder))
   const items = useCartStore((state)=>(state.items))
-  const { handlePaystackPayment, verifyPayment } = useCheckoutStore();
+  const { handlePaystackPayment} = useCheckoutStore();
   const setAmount = useCheckoutStore((state)=>(state.setAmount))
   const amount = useCheckoutStore((state)=>(state.amount))
   const preview = useOrderStore((state)=>(state.preview)) 
-  const setItems = useCheckoutStore((state)=>(state.setItems))
   const isPaying = useCheckoutStore((state)=>(state.isPaying))
+
+  // const OrderSummary = dynamic(() => import("app/components/Checkout/OrderSummary"), {
+  //   ssr: false,
+  // });
+  // const ShippingForm = dynamic(() => import("app/components/Checkout/ShippingForm"), {
+  //   ssr: false,
+  // });
+  
   
 
 
@@ -47,17 +57,6 @@ const CheckoutPage = () => {
     pickupStation: ""
   });
 
-    useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    script.onload = () => console.log("Paystack SDK Loaded");
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
 
   useEffect(() => {
     if (calculationDone && preview?.total) {
@@ -66,9 +65,6 @@ const CheckoutPage = () => {
   }, [calculationDone, preview, setAmount]);
 
 
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  // };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -100,15 +96,19 @@ const CheckoutPage = () => {
     }
 
     
-    if (!window.PaystackPop) {
-      toast.error("Paystack SDK not loaded. Please refresh and try again.");
-      return;
-    }
 
     if (!preview?.total) {
       toast.error("Total not calculated yet. Please wait...");
       return;
     }
+
+    const formattedItems: CheckoutRequestPayload["items"] = cartItems.map(item => ({
+      productId: item.id,
+      quantity: item.quantity,
+      discountId: item.discountId ?? undefined, 
+    }));
+
+
 
     console.log('subtotal',preview.subtotal)
 
@@ -124,13 +124,7 @@ const CheckoutPage = () => {
       extraInstructions,
       pickupStation,
       deliveryType,
-      amount: preview?.total,
-      subtotal: preview?.subtotal,
-      taxAmount: preview?.taxAmount,
-      taxRate: preview?.taxRate,
-      shippingFee: preview?.shippingFee,
-      total: preview?.total,
-      items
+      items: formattedItems
     });
 
   };
@@ -146,15 +140,15 @@ const CheckoutPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
+      <div className="bg-white/80 backdrop-blur-md border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-r from-green-600 to-emerald-700 p-2 rounded-xl">
-                <ShoppingBag className="w-6 h-6 text-white" />
+                <ShoppingBag className="md:w-6 md:h-6 w-4 h-4 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent">
-                Elegant Checkout
+              <h1 className="md:text-2xl text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent">
+                RichField Checkout
               </h1>
             </div>
             <div className="flex items-center space-x-2">
@@ -165,39 +159,69 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      {/* Progress Steps */}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center mb-12">
-          {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center">
-              <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
-                currentStep >= step.number 
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-700 border-transparent text-white shadow-lg' 
-                  : 'border-gray-300 text-gray-400 bg-white'
-              }`}>
-                <step.icon className="w-5 h-5" />
+        {/* Progress Steps */}
+        <div className="max-w-7xl sm:max-w-3xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-wrap items-center justify-center mb-8 sm:mb-12">
+            {steps.map((step, index) => (
+              <div key={step.number} className="flex items-center">
+                <div
+                  className={`flex items-center justify-center 
+                    w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 
+                    rounded-full border-2 transition-all duration-300 
+                    ${
+                      currentStep >= step.number
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-700 border-transparent text-white shadow-md sm:shadow-lg'
+                        : 'border-gray-300 text-gray-400 bg-white'
+                    }`}
+                >
+                  <step.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+
+                <div className="ml-2 sm:ml-3 mr-4 sm:mr-8">
+                  <p
+                    className={`text-xs sm:text-sm font-medium ${
+                      currentStep >= step.number ? 'text-green-600' : 'text-gray-400'
+                    }`}
+                  >
+                    Step {step.number}
+                  </p>
+                  <p
+                    className={`text-xs sm:text-sm ${
+                      currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
+                    }`}
+                  >
+                    {step.title}
+                  </p>
+                </div>
+
+                {index < steps.length - 1 && (
+                  <div
+                    className={`h-0.5 transition-all duration-300 
+                      w-8 sm:w-12 md:w-16 
+                      ${
+                        currentStep > step.number
+                          ? 'bg-gradient-to-r from-green-600 to-emerald-700'
+                          : 'bg-gray-300'
+                      }`}
+                  />
+                )}
               </div>
-              <div className="ml-3 mr-8">
-                <p className={`text-sm font-medium ${currentStep >= step.number ? 'text-green-600' : 'text-gray-400'}`}>
-                  Step {step.number}
-                </p>
-                <p className={`text-sm ${currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'}`}>
-                  {step.title}
-                </p>
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`w-16 h-0.5 transition-all duration-300 ${
-                  currentStep > step.number ? 'bg-gradient-to-r from-green-600 to-emerald-700' : 'bg-gray-300'
-                }`} />
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
+
         {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Left Column - Forms */}
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Order Summary first on mobile, right side on desktop */}
+          <div className="order-1 lg:order-2 lg:col-span-1">
+            <OrderSummary items={cartItems} amount={amount} calculationDone={calculationDone} />
+          </div>
+
+          {/* Shipping & Payment Sections */}
+          <div className="order-2 lg:order-1 lg:col-span-2 space-y-8">
             {currentStep === 1 && (
               <ShippingForm 
                 formData={formData}
@@ -241,11 +265,6 @@ const CheckoutPage = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Right Column - Order Summary */}
-          <div className="lg:col-span-1">
-            <OrderSummary items={cartItems} amount={amount} calculationDone={calculationDone} />
           </div>
         </div>
       </div>

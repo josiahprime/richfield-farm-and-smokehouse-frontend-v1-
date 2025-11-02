@@ -4,13 +4,15 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import toast from "react-hot-toast";
 import { useReviewStore } from "store/review/useReviewStore";
+import { useAuthStore } from "store/auth/useAuthStore";
 
 interface WriteReviewFormProps {
   productId: string;
 }
 
 export default function WriteReviewForm({ productId }: WriteReviewFormProps) {
-  const { addReview, loading, error } = useReviewStore();
+  const { addReview, loading } = useReviewStore();
+  const userId = useAuthStore((state)=>state.authUser?.id)
 
   const [formName, setFormName] = useState("");
   const [formRating, setFormRating] = useState(0);
@@ -22,8 +24,14 @@ export default function WriteReviewForm({ productId }: WriteReviewFormProps) {
       return;
     }
 
+    if (!userId) {
+      toast.error("You must be logged in to submit a review");
+      return;
+    }
+
     const reviewData = {
       name: formName.trim(),
+      userId,
       rating: formRating,
       text: formText.trim(),
       productId,

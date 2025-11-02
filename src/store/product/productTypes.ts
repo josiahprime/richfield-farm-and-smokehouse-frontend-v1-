@@ -8,10 +8,13 @@ export interface EditableImage {
 
 export interface Discount {
   id: string;
-  name: string;
-  percentage: number;
-  validFrom: string;
-  validUntil: string;
+  type: "PERCENTAGE" | "FIXED";
+  value: number;
+  label: string;
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
 }
 
 export interface Product {
@@ -20,6 +23,8 @@ export interface Product {
   priceInKobo: number;
   description: string;
   stock: number;
+  rating?: number;
+  reviews?: string[];
   images: EditableImage[];
   category: string;
   tags: string[];
@@ -30,18 +35,18 @@ export interface Product {
   updatedAt: string;
   favorites: string[];
   isFavorite?: boolean;
-  discount: string[]
-  displayLabel: string;
+  discountId?: string;
+  discount?: Discount;
+  displayLabel?: string;
 }
 
-
 export interface DailyDeal {
-  id: string;
+  id: number;
   productId: string;
   dealDate: string;
-  isExpired: boolean;
+  expiresAt: string;
+  createdAt: string;
   product: Product;
-  discountPercentage: number;
 }
 
 export interface ProductFormData {
@@ -56,38 +61,9 @@ export interface ProductFormData {
   unitType: string;
   isVariableWeight: boolean;
   minOrderQuantity: number;
-  discountId?: string | null; // 👈 only this
+  discountId?: string | null;
   displayLabel?: "NONE" | "POPULAR" | "DAILY_DEAL" | "NEW_ARRIVAL" | "FEATURED";
-  
 }
-
-// export interface CreateProductPayload {
-//   formData: {
-//     id?: string;
-//     productName: string;
-//     description: string;
-//     category: string;
-//     subCategory: string;
-//     stock: number;
-//     priceInKobo: string;
-//     unitType: string;
-//     isVariableWeight: boolean;
-//     minOrderQuantity?: number;
-
-//     // 🆕 Match frontend form
-//     discountType?: "PERCENTAGE" | "FIXED";
-//     discountValue?: number;
-
-//     // 🆕 Display label added
-//     displayLabel?: "NONE" | "POPULAR" | "DAILY_DEAL" | "NEW_ARRIVAL" | "FEATURED";
-//   };
-//   stock: number;
-//   tags: string[];
-//   formattedImages: EditableImage[];
-// }
-
-
-
 
 export interface CreateProductPayload {
   productName: string;
@@ -101,7 +77,7 @@ export interface CreateProductPayload {
   minOrderQuantity?: number;
   tags?: string[];
   images: EditableImage[];
-  discountId?: string | null; // 👈 only this
+  discountId?: string | null;
   displayLabel?: "NONE" | "POPULAR" | "DAILY_DEAL" | "NEW_ARRIVAL" | "FEATURED";
 }
 
@@ -118,40 +94,56 @@ export interface UpdateProductPayload {
   minOrderQuantity?: number;
   tags?: string[];
   images?: (string | File)[];
-  discountId?: string | null; // 👈 only this
+  discountId?: string | null;
   displayLabel?: "NONE" | "POPULAR" | "DAILY_DEAL" | "NEW_ARRIVAL" | "FEATURED";
 }
 
+/** ✅ For single product endpoint response */
+export interface SingleProductResponse {
+  success: boolean;
+  message?: string;
+  product?: Product;
+}
 
-
-
-// Slice = State
+/** Store types */
 export interface ProductSlice {
   products: Product[] | null;
+  singleProduct?: Product | null; // ✅ add this
   dailyDeals: DailyDeal[];
   popularProducts: Product[];
-  favorites: Product[]; 
+  favorites: Product[];
   isCreatingProduct: boolean;
   isFetchingProducts: boolean;
   isLoading: boolean;
   isUpdatingProduct: boolean;
   error: string | null;
   success: boolean;
-  data: any | null;
+  data: unknown | null;
 }
 
-// Slice = Actions
+/** Store actions */
 export interface ProductActions {
   createProduct: (data: CreateProductPayload) => Promise<void>;
-  fetchProducts: (filters?: Record<string, any>, userId?:string) => Promise<void>;
+  fetchProducts: (
+    filters?: Record<string, string | number | boolean>,
+    userId?: string
+  ) => Promise<void>;
+
+  /** ✅ New action for single product */
+  // fetchProductById: (id: string) => Promise<void>;
+  fetchProductById: (id: string, userId?: string) => Promise<void>;
+
   fetchDailyDeals: () => Promise<void>;
   fetchPopularProducts: () => Promise<void>;
   deleteProduct: (productId: string) => Promise<boolean>;
-  updateProduct: (data: UpdateProductPayload) => Promise<boolean>;
+  updateProduct: (payload: FormData) => Promise<boolean>;
   setProduct?: (product: Product) => void;
   fetchFavorites: (userId: string) => Promise<void>;
-  toggleFavorite: (userId: string, productId: string) => Promise<"added" | "removed">;
+  toggleFavorite: (
+    userId: string,
+    productId: string
+  ) => Promise<"added" | "removed">;
 }
 
-// Combined state
+/** Combined state */
 export type ProductState = ProductSlice & ProductActions;

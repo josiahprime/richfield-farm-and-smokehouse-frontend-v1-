@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Bell,
   User,
+  LogIn,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -61,7 +62,7 @@ export const NavLinks = ({ onClick }: { onClick?: () => void }) => {
         </motion.li>
       ))}
 
-      {/* Only show these on mobile (not on lg screens) */}
+      {/* Mobile-only links */}
       <div className="lg:hidden">
         <motion.li custom={navLinks.length} variants={listVariants}>
           <Link
@@ -74,7 +75,7 @@ export const NavLinks = ({ onClick }: { onClick?: () => void }) => {
           </Link>
         </motion.li>
 
-        {authUser && (
+        {authUser ? (
           <>
             <motion.li custom={navLinks.length + 1} variants={listVariants}>
               <Link
@@ -89,15 +90,26 @@ export const NavLinks = ({ onClick }: { onClick?: () => void }) => {
 
             <motion.li custom={navLinks.length + 2} variants={listVariants}>
               <Link
-                href="/profile"
+                href="/account"
                 onClick={onClick}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-md"
               >
                 <User className="w-4 h-4" />
-                Profile
+                Account
               </Link>
             </motion.li>
           </>
+        ) : (
+          <motion.li custom={navLinks.length + 3} variants={listVariants}>
+            <Link
+              href="/login"
+              onClick={onClick}
+              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-white hover:bg-primary rounded-md transition"
+            >
+              <LogIn className="w-4 h-4" />
+              Login
+            </Link>
+          </motion.li>
         )}
       </div>
     </motion.ul>

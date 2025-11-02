@@ -1,10 +1,10 @@
 import { ReviewState, Review } from "./reviewTypes";
 import axiosInstance from "lib/axios";
+import { AxiosError } from "axios";
 
 export const createReviewActions = (
-  set: (partial: Partial<ReviewState> | ((state: ReviewState) => Partial<ReviewState>)) => void,
-  get: () => ReviewState
-) => ({
+  set: (partial: Partial<ReviewState> | ((state: ReviewState) => Partial<ReviewState>)) => void
+  ) => ({
   reviews: [] as Review[],
   loading: false,
   error: null as string | null,
@@ -18,11 +18,12 @@ fetchReviews: async (productId: string) => {
     
     // Use the data directly — no mapping needed
     set({ reviews: res.data.reviews || [], loading: false });
-  } catch (err: any) {
-    console.error("Failed to fetch reviews:", err);
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    console.error("Failed to fetch reviews:", error);
     set({
       loading: false,
-      error: err.response?.data?.message || "Failed to load reviews",
+      error: error.response?.data?.error || "Failed to load reviews",
     });
   }
 },
@@ -42,8 +43,12 @@ fetchReviews: async (productId: string) => {
       ...data,
       id: `temp-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date().toISOString(),
-      user: { name: "You" },
-    } as Review;
+      user: {
+        name: "You",
+        profilePic: "/placeholder-profile.png", // or any temporary image
+      },
+    };
+
 
     // 2️⃣ Show immediately
     set((state) => ({
@@ -67,14 +72,15 @@ fetchReviews: async (productId: string) => {
         ),
         loading: false,
       }));
-    } catch (err: any) {
-      console.error("Failed to submit review:", err);
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.error("Failed to submit review:", error);
 
       // 5️⃣ Rollback on failure
       set((state) => ({
         reviews: state.reviews.filter((r) => r.id !== optimisticReview.id),
         loading: false,
-        error: err.response?.data?.message || "Failed to submit review",
+        error: error.response?.data?.error || "Failed to submit review",
       }));
     }
   },

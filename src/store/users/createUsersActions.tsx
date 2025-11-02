@@ -2,13 +2,14 @@ import { StateCreator } from "zustand";
 import { UserSlice, UserActions } from "./usersTypes";
 import toast from 'react-hot-toast';
 import { axiosInstance } from '../../lib/axios';
+import { AxiosError } from "axios";
 
 export const createUsersActions: StateCreator<
   UserSlice & UserActions,
   [],
   [],
   UserSlice & UserActions
-> = (set, get) => ({
+> = (set) => ({
   users: [],
   currentUser: null,
   isLoading: false,
@@ -51,8 +52,9 @@ export const createUsersActions: StateCreator<
       }));
 
       toast.success(`User role updated to ${newRole}`);
-    } catch (err: any) {
-      console.error('Role update failed:', err);
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.error('Role update failed:', error);
       set({ isLoading: false, error: 'Failed to update role' });
       toast.error('Failed to update user role');
     }

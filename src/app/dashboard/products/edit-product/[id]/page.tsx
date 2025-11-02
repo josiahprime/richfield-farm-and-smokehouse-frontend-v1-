@@ -8,6 +8,16 @@ import { useParams } from "next/navigation";
 import { useProductStore } from "store/product/useProductStore";
 import { useDiscountStore } from "store/discount/useDiscountStore";
 
+
+
+interface InputFieldProps {
+  label: string;
+  name: string;
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+}
+
 const EditProduct = () => {
   const [newTag, setNewTag] = useState('');
   const { id } = useParams();
@@ -61,6 +71,12 @@ const EditProduct = () => {
     setProduct(foundProduct || null);
   }, [products, id]);
 
+  const parseDisplayLabel = (label?: string) =>
+  ["NONE", "POPULAR", "DAILY_DEAL", "NEW_ARRIVAL", "FEATURED"].includes(label || "")
+    ? (label as "NONE" | "POPULAR" | "DAILY_DEAL" | "NEW_ARRIVAL" | "FEATURED")
+    : "NONE";
+
+
   // Set the formData when product is found
   useEffect(() => {
     if (product) {
@@ -70,7 +86,7 @@ const EditProduct = () => {
         priceInKobo: product.priceInKobo,
         description: product.description,
         stock: product.stock,
-        images: product.images.map((img, index) => ({
+        images: product.images.map((img) => ({
           id: img.id,
           url: img.url,
           index: img.index, 
@@ -81,7 +97,7 @@ const EditProduct = () => {
         isVariableWeight: product.isVariableWeight ?? false,
         minOrderQuantity: product.minOrderQuantity ?? 1,
          discountId: product.discountId || "", // 
-         displayLabel: product.displayLabel || "NONE",
+         displayLabel: parseDisplayLabel(product.displayLabel),
 
       });
     }
@@ -107,10 +123,10 @@ const EditProduct = () => {
   };
 
 
-  const handleTagsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const tagsArray = e.target.value.split(",").map((t) => t.trim()).filter(Boolean);
-    setFormData((prev) => ({ ...prev, tags: tagsArray }));
-  };
+  // const handleTagsChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const tagsArray = e.target.value.split(",").map((t) => t.trim()).filter(Boolean);
+  //   setFormData((prev) => ({ ...prev, tags: tagsArray }));
+  // };
 
   // Image change for specific slot
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>, indexToReplace: number) => {
@@ -134,6 +150,14 @@ const EditProduct = () => {
       return { ...prev, images: updated };
     });
   };
+
+  const handleRemoveTag = (indexToRemove: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((_, i) => i !== indexToRemove),
+    }));
+  };
+
 
 
   // Add new image
@@ -194,7 +218,8 @@ const EditProduct = () => {
     form.append("isVariableWeight", String(formData.isVariableWeight));
     form.append("minOrderQuantity", String(formData.minOrderQuantity));
     form.append("discountId", formData.discountId || "");
-    form.append("displayLabel", formData.displayLabel);
+    form.append("displayLabel", formData.displayLabel || "NONE");
+
 
 
 
@@ -440,17 +465,25 @@ const EditProduct = () => {
 };
 
 // Reusable input field
-const InputField = ({ label, name, value, onChange, type = "text" }: any) => (
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+}) => (
   <div>
     <label className="block text-sm font-medium mb-1 text-gray-700">{label}</label>
     <input
       type={type}
       name={name}
-      value={value}
+      value={Number.isNaN(value) ? "" : value}
       onChange={onChange}
       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   </div>
 );
+
+
 
 export default EditProduct;

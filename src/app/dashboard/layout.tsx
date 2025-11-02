@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { AuthWrapper } from "../components/AuthProvider/AuthProvider";
-import Sidebar from './components/sidebar/Sidebar'; // your custom components
+import Sidebar from './components/sidebar/Sidebar';
 import Navbar from './components/navbar/Navbar';
+import DashboardGuard from "./components/DashboardGuard/DashboardGuard";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -25,22 +26,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <Toaster position="top-right" reverseOrder={false} />
         <AuthWrapper>
-          <Sidebar/>
-          <div className="flex-1 w-full min-h-screen overflow-y-auto">
-            <Navbar/>
-            {/* <TestToast/> */}
-            <div className="p-6 bg-gray-50 min-h-screen ml-40">
-              {children}
+          <DashboardGuard>
+            <Sidebar />
+            <div className="flex-1 w-full min-h-screen overflow-y-auto">
+              <Navbar />
+              <div className="p-6 bg-gray-50 min-h-screen ml-40">
+                {children}
+              </div>
             </div>
-          </div>
+          </DashboardGuard>
         </AuthWrapper>
       </body>
     </html>

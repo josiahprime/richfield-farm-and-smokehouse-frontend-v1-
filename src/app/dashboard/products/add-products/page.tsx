@@ -6,6 +6,7 @@ import { BsBoxSeam } from "react-icons/bs";
 import { useProductStore, } from "store/product/useProductStore";
 import { useDiscountStore } from "store/discount/useDiscountStore";
 import { ProductState } from "store/product/productTypes";
+import Image from "next/image";
 
 // Type for uploaded image
 type UploadedImage = {
@@ -158,12 +159,22 @@ const [formData, setFormData] = useState<FormData>({
       ...img,
       index, // Add index here
     }));
-    createProduct({ 
-      formData: { ...formData, stock }, 
-      tags, 
-      stock, 
-      formattedImages
+    createProduct({
+      productName: formData.productName,
+      description: formData.description,
+      category: formData.category,
+      subCategory: formData.subCategory,
+      stock: stock,
+      priceInKobo: Number(formData.priceInKobo),
+      unitType: formData.unitType,
+      isVariableWeight: formData.isVariableWeight,
+      minOrderQuantity: formData.minOrderQuantity,
+      tags,
+      images: formattedImages,
+      discountId: formData.discountId || null,
+      displayLabel: formData.displayLabel,
     });
+
     console.log("Product submitted");
   };
   
@@ -397,10 +408,19 @@ const [formData, setFormData] = useState<FormData>({
                 <div className="grid grid-cols-3 gap-3 mt-4">
                   {selectedImages.map((image, index) => (
                     <div key={index} className="relative">
-                      <img src={image.url} alt="Uploaded" className="w-full h-24 object-cover rounded-lg" />
-                      <button 
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                      <div className="relative w-full h-24 rounded-lg overflow-hidden">
+                        <Image
+                          src={image.url}
+                          alt={`Uploaded image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 200px"
+                        />
+                      </div>
+
+                      <button
                         onClick={() => handleRemoveImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                       >
                         <AiOutlineClose />
                       </button>

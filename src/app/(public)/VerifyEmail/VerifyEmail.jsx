@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+'use client'
+
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 
 const VerifyEmail = () => {

@@ -12,7 +12,7 @@ const Orders = () => {
 
   useEffect(() => {
     fetchOrders()
-  }, [])
+  }, [fetchOrders])
 
   if (loading) {
     return (

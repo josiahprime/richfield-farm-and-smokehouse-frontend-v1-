@@ -1,5 +1,6 @@
 import axiosInstance from "lib/axios";
 import { DiscountState, Discount } from "./discountTypes";
+import { AxiosError } from "axios";
 
 export const createDiscountActions = (
   set: (
@@ -19,11 +20,12 @@ export const createDiscountActions = (
     try {
       const res = await axiosInstance.get("/discounts");
       set({ discounts: res.data.discounts || [], loading: false });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       console.error("Failed to fetch discounts:", err);
       set({
         loading: false,
-        error: err.response?.data?.message || "Failed to fetch discounts",
+        error: error.response?.data?.error || "Failed to fetch discounts",
       });
     }
   },
@@ -40,24 +42,16 @@ export const createDiscountActions = (
     set((state) => ({ discounts: [optimistic, ...state.discounts] }));
 
     try {
-      const res = await axiosInstance.post("/discounts", data);
-      // const realDiscount: Discount = { ...res.data, id: String(res.data.id) };
-
-      // set((state) => ({
-      //   discounts: state.discounts.map((d) =>
-      //     d.id === optimistic.id ? realDiscount : d
-      //   ),
-      //   loading: false,
-      // }));
       await get().fetchDiscounts();
       set({ loading: false });
 
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       console.error("Failed to add discount:", err);
       set((state) => ({
         discounts: state.discounts.filter((d) => d.id !== optimistic.id),
         loading: false,
-        error: err.response?.data?.message || "Failed to add discount",
+        error: error.response?.data?.error || "Failed to add discount",
       }));
     }
   },
@@ -82,14 +76,15 @@ export const createDiscountActions = (
     try {
       await axiosInstance.patch(`/discounts/${id}`, data);
       set({ loading: false });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       console.error("Failed to update discount:", err);
       set((state) => ({
         discounts: state.discounts.map((d) =>
           d.id === id ? prevDiscount : d
         ),
         loading: false,
-        error: err.response?.data?.message || "Failed to update discount",
+        error: error.response?.data?.error || "Failed to update discount",
       }));
     }
   },
@@ -106,13 +101,14 @@ export const createDiscountActions = (
     try {
       await axiosInstance.delete(`/discounts/${id}`);
       set({ loading: false });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       console.error("Failed to delete discount:", err);
       set({
         discounts: prevDiscounts,
         loading: false,
         error:
-          err.response?.data?.message || "Failed to delete discount",
+          error.response?.data?.error || "Failed to delete discount",
       });
     }
   },

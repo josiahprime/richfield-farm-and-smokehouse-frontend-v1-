@@ -28,13 +28,14 @@ export interface Order {
   tx_ref: string;
   trackingId: string;
   userId: string;
-  items: string[];
+  items: OrderItem[];
   name: string;
   email: string;
   amount: number;
   status: OrderStatus;
   
   fulfillmentStatus: FulfillmentStatus;
+  deliveryType: string;
   deliveryProvider: string;
   deliveryTrackingUrl: string;
   createdAt: string;
@@ -59,6 +60,28 @@ export interface Order {
   };
 }
 
+export interface OrderItem {
+  productName: string;
+  priceInKobo: number;
+  quantity: number;
+  unitType?: string;
+  image: {
+    id: string;
+    url: string;
+    index: number;
+    publicId: string;
+    createdAt: string;
+    productId: string;
+  };
+  productId: string;
+  discountId: string | null;
+}
+
+
+
+
+
+
 
 
 
@@ -68,7 +91,7 @@ export interface UserOrder {
   trackingId: string;
   createdAt: string; // or Date, depending on your usage
   fulfillmentStatus: string;
-  items: string[]
+  items: OrderItem[];
 }
 
 
@@ -95,5 +118,5 @@ export interface OrderActions {
   updateOrder: (id: string, payload: UpdateFulfillmentStatusPayload) => Promise<boolean>;
   resetOrders: () => void;
   filterOrdersByStatus: (status: OrderStatus) => Order[];
-   previewOrder: (cartItems: CartItem[], userAddress: { state: string; city: string }, deliveryType: string) => Promise<void>;
+   previewOrder: (cartItems: CartItem[], userAddress: { state: string; city: string }, deliveryType: string) => Promise<OrderPreview>;
 }

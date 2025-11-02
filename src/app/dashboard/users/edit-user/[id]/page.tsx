@@ -3,7 +3,9 @@ import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useUserStore } from "store/users/useUsersStore";
 import { FaArrowUp, FaArrowDown, FaBan } from "react-icons/fa";
-import { div } from "framer-motion/client";
+import { UserCircle } from "lucide-react";
+import Image from "next/image";
+
 
 const EditUserPage = () => {
    const { id } = useParams();
@@ -16,17 +18,6 @@ const EditUserPage = () => {
     return <div>user not found mofoka</div>
   }
 
-  // Fake data — replace with actual user data (from props, API, or context)
-  // const user = {
-  //   id: 1,
-  //   name: "John Doe",
-  //   email: "john.doe@example.com",
-  //   role: "manager",
-  //   phone: "+1 234 567 890",
-  //   status: "active",
-  //   profilePic: "/default-avatar.png", // update to actual image path
-  //   createdAt: "2023-01-01T12:00:00Z",
-  // };
 
   return (
     
@@ -35,15 +26,24 @@ const EditUserPage = () => {
         <div className="p-8 bg-gray-50 min-h-screen">
           <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
             <div className="flex items-center gap-6 p-6 border-b">
-              <img
-                src={''}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover border-4 border-blue-500"
-              />
+              {user.profilePic ? (
+                <Image
+                  src={user.profilePic}
+                  alt="Profile"
+                  width={96}
+                  height={96}
+                  className="rounded-full object-cover border-4 border-blue-500"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full border-4 border-blue-500 flex items-center justify-center bg-gray-100">
+                  <UserCircle className="text-gray-500 w-12 h-12" />
+                </div>
+              )}
+
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">{user.username}</h1>
                 <p className="text-sm text-gray-500">{user.email}</p>
-                <p className="text-sm text-gray-500">Phone: {}</p>
+                <p className="text-sm text-gray-500">Phone: {user.phone || "N/A"}</p>
                 <p className="text-sm text-gray-500">
                   Joined: {new Date(user.createdAt).toLocaleDateString()}
                 </p>

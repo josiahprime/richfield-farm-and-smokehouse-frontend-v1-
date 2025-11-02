@@ -30,7 +30,7 @@ const ConfirmPortal = ({ visible, title, onConfirm, onClose }: ConfirmPortalProp
     }
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [visible]);
+  }, [visible, onClose]);
 
   if (!isMounted) return null;
 

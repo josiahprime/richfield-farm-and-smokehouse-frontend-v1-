@@ -1,71 +1,83 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import PopularProductCard from "app/components/PopularProductCard/PopularProductCard";
+import type { Product } from "store/product/productTypes";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice: number;
-  image: string;
-  rating: number;
-  reviews: number;
-  badge: string;
-  weight: string;
-  farm: string;
-  freshness: string;
-  description: string;
-}
+
+
+
 
 interface Props {
   products: Product[];
 }
+
 
 const ProductSlider = ({ products }: Props) => {
   const visibleCount = 5;
   const [index, setIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isHoveredRef = useRef(false);
 
   const total = products?.length ?? 0;
 
-  const nextSlide = () => {
+  // ✅ Wrap in useCallback
+  const nextSlide = useCallback(() => {
     if (total === 0) return;
     setAnimating(true);
     setTimeout(() => {
       setIndex((prev) => (prev + 1) % total);
       setAnimating(false);
     }, 500);
-  };
+  }, [total]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     if (total === 0) return;
     setAnimating(true);
     setTimeout(() => {
       setIndex((prev) => (prev - 1 + total) % total);
       setAnimating(false);
     }, 500);
-  };
+  }, [total]);
 
-  const getVisibleProducts = () => {
+  const getVisibleProducts = useCallback(() => {
     if (!products || total === 0) return [];
     return Array.from({ length: visibleCount }, (_, i) => {
       const current = (index + i) % total;
       return products[current] ?? null;
     });
-  };
+  }, [products, index, total]);
 
+  // Auto-slide logic
   useEffect(() => {
     if (total === 0) return;
-    intervalRef.current = setInterval(() => {
-      nextSlide();
-    }, 2000);
+
+    const startAutoSlide = () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(() => {
+        if (!isHoveredRef.current) nextSlide(); // only slide if not hovered
+      }, 2000);
+    };
+
+    startAutoSlide();
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [total]);
+  }, [total, nextSlide]);
+
+  const handleMouseEnter = () => {
+    isHoveredRef.current = true;
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
+  const handleMouseLeave = () => {
+    isHoveredRef.current = false;
+    intervalRef.current = setInterval(() => {
+      if (!isHoveredRef.current) nextSlide();
+    }, 2000);
+  };
 
   if (!products || total === 0) {
     return (
@@ -76,7 +88,11 @@ const ProductSlider = ({ products }: Props) => {
   }
 
   return (
-    <div className="relative max-w-7xl mx-auto py-10 overflow-hidden">
+    <div
+      className="relative max-w-7xl mx-auto py-10 overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Sliding wrapper */}
       <div
         className={`flex gap-4 transition-transform duration-500 ease-in-out ${

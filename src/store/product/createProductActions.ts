@@ -1,14 +1,13 @@
 // createProductActions.ts
 import { StateCreator } from 'zustand';
 import toast from 'react-hot-toast';
+import { AxiosError } from "axios";
 
 import { axiosInstance } from '../../lib/axios';
 import {
   ProductSlice,
   ProductActions,
-  Product,
   CreateProductPayload,
-  UpdateProductPayload
 } from './productTypes';
 
 export const createProductActions: StateCreator<
@@ -16,53 +15,51 @@ export const createProductActions: StateCreator<
   [],
   [],
   ProductActions
-> = (set, get) => ({
+> = (set) => ({
   setProduct: (product) => {
     // Optionally store a selected or active product (if needed)
     console.log('Product set:', product);
   },
 
-
-  createProduct: async ({ formData, tags, stock, formattedImages }: CreateProductPayload) => {
+  createProduct: async (payload: CreateProductPayload) => {
     set({ isLoading: true, error: null, success: false });
-    console.log('🚀 Starting product creation...');
+    console.log("🚀 Starting product creation...");
 
     try {
       const data = new FormData();
 
       // 🧩 Basic product info
-      data.append("productName", formData.productName);
-      data.append("description", formData.description);
-      data.append("category", formData.category);
+      data.append("productName", payload.productName);
+      data.append("description", payload.description);
+      data.append("category", payload.category);
 
-      if (formData.subCategory)
-        data.append("subCategory", formData.subCategory);
+      if (payload.subCategory)
+        data.append("subCategory", payload.subCategory);
 
-      data.append("priceInKobo", String(formData.priceInKobo));
-      data.append("stock", String(stock));
-      data.append("unitType", formData.unitType);
-      data.append("isVariableWeight", String(formData.isVariableWeight));
+      data.append("priceInKobo", String(payload.priceInKobo));
+      data.append("stock", String(payload.stock));
+      data.append("unitType", payload.unitType);
+      data.append("isVariableWeight", String(payload.isVariableWeight));
 
-      if (formData.minOrderQuantity)
-        data.append("minOrderQuantity", String(formData.minOrderQuantity));
+      if (payload.minOrderQuantity)
+        data.append("minOrderQuantity", String(payload.minOrderQuantity));
 
-      // 🏷️ Tags (as JSON string)
-      if (tags && tags.length > 0)
-        data.append("tags", JSON.stringify(tags));
+      // 🏷️ Tags
+      if (payload.tags && payload.tags.length > 0)
+        data.append("tags", JSON.stringify(payload.tags));
 
-      // 🧮 Discount (only discountId now)
-      if (formData.discountId)
-        data.append("discountId", formData.discountId);
+      // 🧮 Discount
+      if (payload.discountId)
+        data.append("discountId", payload.discountId);
 
       // 💡 Display label
-      if (formData.displayLabel)
-        data.append("displayLabel", formData.displayLabel);
+      if (payload.displayLabel)
+        data.append("displayLabel", payload.displayLabel);
 
       // 🖼️ Handle images
-      formattedImages.forEach((imgObj) => {
-        if (imgObj.file instanceof File) {
-          data.append("images", imgObj.file);
-          data.append("imageIndexes", String(imgObj.index));
+      payload.images.forEach((file) => {
+        if (file instanceof File) {
+          data.append("images", file);
         }
       });
 
@@ -78,29 +75,34 @@ export const createProductActions: StateCreator<
       console.log("✅ Product created:", response.data);
 
       return response.data;
-
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       console.error("❌ Product creation failed:", err);
-      set({ isLoading: false, error: err.message || "Failed to create product" });
+      set({
+        isLoading: false,
+        error: error.response?.data.error || "Failed to create product",
+      });
       toast.error("There was an error adding this item");
     }
   },
 
 
-  updateProduct: async (formData: UpdateProductPayload) => {
+  updateProduct: async (payload: FormData) => {
     set({ isUpdatingProduct: true });
     try {
-      const res = await axiosInstance.put(`/products/${formData.get("id")}`, formData, {
+      const id = payload.get("id") as string; // FormData values are string | File
+      const res = await axiosInstance.put(`/products/${id}`, payload, {
         headers: {
-          "Content-Type": "multipart/form-data", // 🧠 crucial for file uploads
+          "Content-Type": "multipart/form-data",
         },
       });
 
       set({ data: res.data });
       toast.success("Item updated successfully");
       return true;
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Item update failed");
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      toast.error(error.response?.data?.error || "Item update failed");
       return false;
     } finally {
       set({ isUpdatingProduct: false });
@@ -108,8 +110,10 @@ export const createProductActions: StateCreator<
   },
 
 
+
   fetchProducts: async (filters = {}, userId?: string) => {
     set({ isLoading: true, error: null });
+    console.log('fetching products....')
 
     try {
       // merge filters + userId
@@ -120,10 +124,40 @@ export const createProductActions: StateCreator<
       console.log('response from products db',response)
 
       set({ products: response.data.products, isLoading: false }); 
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       set({ isLoading: false, error: error.message });
     }
   },
+
+  fetchProductById: async (id: string, userId?: string) => {
+    try {
+      set({ isLoading: true, error: null, singleProduct: null });
+
+      // Build query string only if userId exists
+      const query = userId ? `?userId=${userId}` : "";
+
+      // ✅ send optional userId as query param
+      const res = await axiosInstance.get(`/products/${id}${query}`);
+
+      const product = res.data?.product;
+      if (!product) throw new Error("Product not found");
+
+      set({ singleProduct: product, success: true });
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      console.error("Error fetching product by ID:", err);
+      set({
+        error: error.message || "Failed to fetch product details",
+        singleProduct: null,
+        success: false,
+      });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+
 
 
 
@@ -135,8 +169,9 @@ export const createProductActions: StateCreator<
       await axiosInstance.delete(`/products/${id}`);
       toast.success('Item deleted successfully');
       return true;
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Item delete failed');
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      toast.error(error.response?.data?.error || 'Item delete failed');
       return false;
     } finally {
       set({ isLoading: false });
@@ -149,8 +184,9 @@ export const createProductActions: StateCreator<
     const { data } = await axiosInstance.get(`/products/favorites/${userId}`);
     console.log('favorites from fetch favorites function',data)
     set({ favorites: data, isLoading: false });
-  } catch (err: any) {
-    set({ error: err.message, isLoading: false });
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    set({ error: error.message, isLoading: false });
   }
 },
 
@@ -174,8 +210,9 @@ toggleFavorite: async (userId: string, productId: string) => {
     const result = data.status === "added" ? "added" : "removed";
     console.log("final return value from toggleFavorite:", result); // 👈 log here
     return result;
-  } catch (err: any) {
-    set({ error: err.message });
+  } catch (err) {
+    const error = err as AxiosError<{ error: string }>;
+    set({ error: error.message });
     return "removed";
   }
 },
@@ -190,7 +227,8 @@ toggleFavorite: async (userId: string, productId: string) => {
       const response = await axiosInstance.get('/products/daily-deals');
       console.log('fetch daily deals res', response)
       set({ dailyDeals: response.data.dailyDeals, isLoading: false });
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
       set({ isLoading: false, error: error.message });
     }
     
@@ -203,7 +241,8 @@ toggleFavorite: async (userId: string, productId: string) => {
         const response = await axiosInstance.get('/products/popular-products');
         console.log('fetch popular products res', response)
         set({ popularProducts: response.data.popularProducts, isLoading: false });
-      } catch (error: any) {
+      } catch (err) {
+        const error = err as AxiosError<{ error: string }>;
         set({ isLoading: false, error: error.message });
       }  
   }

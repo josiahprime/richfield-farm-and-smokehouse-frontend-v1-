@@ -11,14 +11,20 @@ export interface PaystackPaymentPayload {
   extraInstructions?: string;
   pickupStation?: string;
   deliveryType: "home" | "pickup";
-  amount: number;
-  items: CheckoutItem[];
-  subtotal?: number;
-  taxAmount?: number;
-  taxRate?: number;
-  shippingFee?: number;
-  total?: number;
+  items: CheckoutRequestItem[];
 }
+
+
+export interface CheckoutRequestItem {
+  productId: string;
+  quantity: number;
+  discountId?: string
+}
+
+export interface CheckoutRequestPayload {
+  items: CheckoutRequestItem[];
+}
+
 
 export interface CheckoutItem {
   id: string;
@@ -35,7 +41,7 @@ export interface CheckoutState {
   email: string;
   phone: string;
   name: string;
-  items: CheckoutItem[];
+  items: CheckoutRequestItem[];
   status: 'loading' | 'success' | 'error';
   message: string;
 }
