@@ -66,5 +66,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: protectedRoutes.map(route => `${route.path}/:path*`),
+  matcher: [
+    '/dashboard/:path*',
+    '/account/:path*',
+    '/cart/checkout/:path*',
+    '/notifications/:path*',
+    '/settings/:path*'
+  ]
 };
+
