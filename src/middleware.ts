@@ -29,6 +29,11 @@ export async function middleware(req: NextRequest) {
       credentials: 'include',
     });
 
+    console.log(
+      `[Next.js Middleware Handler] 🧭 verify URL: ${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/verify`
+    );
+
+
     console.log("🔍 verifyRes.status:", verifyRes.status);
 
     // Attempt to parse JSON even if status is 401
