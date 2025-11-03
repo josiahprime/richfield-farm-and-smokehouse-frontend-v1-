@@ -30,7 +30,7 @@ useEffect(() => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="lg:flex lg:items-center">
             <Link href="/" className="max-sm:hidden flex items-center">
-              <Image src="/assets/logo.png" alt="logo" width={24} height={24} className="w-6"/>
+              <Image src="https://res.cloudinary.com/djmnjen6v/image/upload/v1762097380/logo_f7mhch.png" alt="logo" width={24} height={24} className="w-6"/>
               <p className="text-3xl font-extrabold">
                 RICH<span className="text-white font-medium">FIELD</span>
               </p>

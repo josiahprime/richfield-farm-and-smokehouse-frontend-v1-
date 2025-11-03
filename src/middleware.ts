@@ -3,6 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
+
+console.log("🌍 NODE_ENV:", process.env.NODE_ENV);
+console.log("🔗 BACKEND base URL:", BACKEND);
+
 const protectedRoutes = [
   { path: '/dashboard', roles: ['admin', 'user'] },
   { path: '/account', roles: ['user', 'admin', 'customer'] },

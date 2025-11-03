@@ -1,24 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // experimental: {
-  //   nodeMiddleware: true, // ✅ Enable Node.js middleware support
-  // },
   images: {
-    domains: ['encrypted-tbn0.gstatic.com', 'res.cloudinary.com',],
+    domains: ["encrypted-tbn0.gstatic.com", "res.cloudinary.com"],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "source.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com", // sometimes Unsplash redirects here
-      },
+      { protocol: "https", hostname: "source.unsplash.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
-    
   },
-  /* config options here */
+
+  async rewrites() {
+    const backend =
+      process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:5001";
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backend}/api/:path*`, // add `/api` only here, not in env
+      },
+    ];
+  },
 };
 
 export default nextConfig;
