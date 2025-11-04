@@ -1,5 +1,5 @@
 'use client'
-import { ProfileSection } from "app/(public)/account/page";
+import { ProfileSection } from "./MainProfilePage";
 import { NotificationsContent } from "./NotificationContent";
 import { AccountOverview } from "./AccountOverview";
 import OrdersContent from "./OrdersContent";
