@@ -20,7 +20,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ProfileSection } from "app/(public)/account/page";
+import { ProfileSection } from "./MainProfilePage";
 import { useAuthStore } from "store/auth/useAuthStore";
 
 interface ProfileSidebarMobileProps {
