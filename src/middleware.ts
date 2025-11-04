@@ -1,4 +1,9 @@
-// src/middleware.ts
+
+
+
+
+// // src/middleware.ts
+//mb 500 tuesday
 import { NextResponse, type NextRequest } from 'next/server';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
@@ -20,14 +25,28 @@ export async function middleware(req: NextRequest) {
   const matchedRoute = protectedRoutes.find(route => path.startsWith(route.path));
   if (!matchedRoute) return NextResponse.next();
 
+  // const cookie = req.headers.get('cookie') || ''
+  const token = req.cookies.get('jwt')?.value || '';
+
+  console.log('token from req.cookie',token)
+
   try {
+    // const verifyRes = await fetch(`${BACKEND}/api/auth/verify`, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Cookie': `jwt=${token}`,
+    //   },
+    //   credentials: 'include',
+    // });
+
     const verifyRes = await fetch(`${BACKEND}/api/auth/verify`, {
       method: 'GET',
       headers: {
-        cookie: req.headers.get('cookie') || '',
+        'Authorization': `Bearer ${token}`,
       },
-      credentials: 'include',
     });
+
+
 
     console.log(
       `[Next.js Middleware Handler] 🧭 verify URL: ${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/verify`
