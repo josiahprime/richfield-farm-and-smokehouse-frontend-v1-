@@ -1,5 +1,6 @@
 // types.ts
 
+
 export interface SignupPayload {
   username: string;
   email: string;
@@ -45,6 +46,7 @@ export interface AuthUser {
 export interface AuthSlice {
   authUser: AuthUser | null;
   accessToken: string | null; // ✅ move this here
+  isHydrated: boolean;
   isCheckingAuth: boolean;
   isLoading: boolean;
   isSigningUp: boolean;
@@ -53,7 +55,14 @@ export interface AuthSlice {
   isUpdatingProfile: boolean;
   isRequestingReset: boolean;
   isResettingPassword: boolean;
+
+
+   // 🔹 Logged out state
+  isLoggedOut: boolean;
+  logoutReason?: "manual" | "auto" | undefined; // optional reason
 }
+
+
 
 // 🔹 2. Slice for just actions
 export interface AuthActions {
@@ -61,7 +70,8 @@ export interface AuthActions {
   checkAuth: () => Promise<void>;
   signup: (data: SignupPayload) => Promise<{ success: boolean; message: string }>;
   login: (data: LoginPayload) => Promise<boolean>;
-  logout: ()=> Promise<void>;
+  // 🔹 Updated logout signature
+  logout: (reason?: "manual" | "auto") => Promise<void>;
   fetchUser: () => Promise<void>;
   verifyEmail: (data: VerifyEmailPayload) => Promise<boolean>;
   updateProfile: (data: UpdateProfilePayload) => Promise<void>;
@@ -73,6 +83,12 @@ export interface AuthActions {
   clearAccessToken: () => void;
   refreshAccessToken: () => Promise<string>; // ✅ add this
 }
+
+export type AuthStoreWithPersist = AuthState & {
+  persist?: {
+    clearStorage: () => Promise<void> | void;
+  };
+};
 
 
 // 🔹 3. Combine into the store type

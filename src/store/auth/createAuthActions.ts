@@ -7,6 +7,7 @@ import { axiosInstance } from '../../lib/axios';
 import { useAuthStore } from './useAuthStore';
 import { useCartStore } from 'store/cart/useCartStore';
 import { AxiosError } from 'axios';
+import { persist } from 'zustand/middleware';
 import {
   AuthSlice,
   AuthActions,
@@ -73,57 +74,109 @@ export const createAuthActions: StateCreator<
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post('/auth/login', data, { withCredentials: true });
-      
+
       const token = res.data.accessToken;
-      console.log('token from backend', token)
+      console.log('token from backend', token);
+
+      // ✅ Clear persisted auth storage first
+      // Clear persisted auth storage first
+      await Promise.resolve(useAuthStore.persist?.clearStorage?.());
+
+
+      set({
+        authUser: res.data.user,
+        accessToken: token,
+        isLoggedOut: false,       // ✅ clear the logged out flag
+        logoutReason: undefined, 
+      });
+
       
-      // Set axios default headers for future requests
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      // get().setAccessToken(token);
-      set({ authUser: res.data.user });
+      // Save in memory (Zustand)
+      // set({ accessToken: token, authUser: res.data.user });
 
       // Sync local cart with backend
       const cart = useCartStore.getState();
       await cart.mergeCart();
 
       toast.success('Logged in successfully');
-      return true
+      return true;
     } catch (err) {
       const error = err as AxiosError<{ error: string }>;
       console.log(error.response?.data?.error || 'Login failed');
-      return false
+      return false;
     } finally {
       set({ isLoggingIn: false });
     }
   },
 
 
-  logout: async () => {
-  console.log('trying to logout');
-  const method = get().authUser?.authProvider;
+  // login: async (data: LoginPayload) => {
+  //   set({ isLoggingIn: true });
+  //   try {
+  //     const res = await axiosInstance.post('/auth/login', data, { withCredentials: true });
+      
+  //     const token = res.data.accessToken;
+  //     console.log('token from backend', token)
+      
+  //     // Set axios default headers for future requests
+  //     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+  //     // get().setAccessToken(token);
+  //     set({ authUser: res.data.user });
 
-  try {
-    // setIsLoggingOut(true);
+  //     // Sync local cart with backend
+  //     const cart = useCartStore.getState();
+  //     await cart.mergeCart();
 
-    if (method === 'google') {
-      await axiosInstance.get('/auth/google/logout');
-    } else {
-      await axiosInstance.post('/auth/logout');
+  //     toast.success('Logged in successfully');
+  //     return true
+  //   } catch (err) {
+  //     const error = err as AxiosError<{ error: string }>;
+  //     console.log(error.response?.data?.error || 'Login failed');
+  //     return false
+  //   } finally {
+  //     set({ isLoggingIn: false });
+  //   }
+  // },
+
+
+  logout: async (reason: "manual" | "auto" = "manual") => {
+    console.log('trying to logout');
+    const method = get().authUser?.authProvider;
+
+    try {
+      if (method === 'google') {
+        await axiosInstance.get('/auth/google/logout');
+      } else {
+        await axiosInstance.post('/auth/logout');
+      }
+
+      delete axiosInstance.defaults.headers.common['Authorization'];
+
+      set({
+        accessToken: null,
+        authUser: null,
+        isCheckingAuth: false,
+        isLoggedOut: true,        // ✅ mark logged out
+        logoutReason: reason,     // ✅ store the reason
+      });
+
+      console.log('isLoggedOut after set:', get().isLoggedOut);
+
+      if (reason === 'manual') {
+        toast.success('Logged out successfully');
+      }
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      if (reason === 'manual') {
+        toast.error(error.response?.data?.error || 'Logout failed');
+      }
+    } finally {
+      set({ isLoggedOut: true });
+      console.log('logged out');
     }
+  },
 
-    delete axiosInstance.defaults.headers.common['Authorization'];
-    set({ accessToken: null, authUser: null, isCheckingAuth: false });
-
-    toast.success('Logged out successfully');
-  } catch (err) {
-    const error = err as AxiosError<{ error: string }>;
-    toast.error(error.response?.data?.error || 'Logout failed');
-  } finally {
-    // setIsLoggingOut(false);
-    console.log('logged out')
-  }
-},
 
 
 

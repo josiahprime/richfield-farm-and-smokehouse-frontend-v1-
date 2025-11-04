@@ -32,7 +32,7 @@ export default function RootLayout({
       <body>
         <Toaster position="top-right" reverseOrder={false} />
         <AuthWrapper>
-          <DashboardGuard>
+          <DashboardGuard requiredRoles={["admin"]}>
             <Sidebar />
             <div className="flex-1 w-full min-h-screen overflow-y-auto">
               <Navbar />

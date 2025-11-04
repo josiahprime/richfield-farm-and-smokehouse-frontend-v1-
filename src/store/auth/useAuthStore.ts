@@ -1,20 +1,37 @@
 import { create } from 'zustand';
-import { AuthState, AuthSlice } from './types';
+import { persist } from 'zustand/middleware';
+import { AuthState } from './types';
 import { createAuthActions } from './createAuthActions';
 
-export const useAuthStore = create<AuthState & AuthSlice>()((set, get, store) => ({
-  // ✅ Initial state
-  authUser: null,
-  accessToken: null,
-  isCheckingAuth: false,
-  isSigningUp: false,
-  isLoggingIn: false,
-  isVerifyingEmail: false,
-  isUpdatingProfile: false,
-  isRequestingReset: false,
-  isResettingPassword: false,
-  isLoading: false,
 
-  // ✅ Auth actions
-  ...createAuthActions(set, get, store),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get, store) => ({
+      authUser: null,
+      accessToken: null,
+      isCheckingAuth: false,
+      isSigningUp: false,
+      isLoggingIn: false,
+      isVerifyingEmail: false,
+      isUpdatingProfile: false,
+      isRequestingReset: false,
+      isResettingPassword: false,
+      isLoading: false,
+      isHydrated: false,
+      isLoggedOut: false,
+      ...createAuthActions(set, get, store),
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        authUser: state.authUser,
+        isLoggedOut: state.isLoggedOut,
+        logoutReason: state.logoutReason,
+      }),
+      onRehydrateStorage: () => (state) => {
+        console.log('🌀 Auth store rehydrated');
+        if (state) state.isHydrated = true;
+      },
+    }
+  )
+);

@@ -3,14 +3,13 @@ import { useAuthStore } from '../store/auth/useAuthStore';
 
 export const axiosInstance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
-  withCredentials: true, // sends HttpOnly cookies automatically
+  withCredentials: true,
 });
 
 let isRefreshing = false;
 let failedQueue: { resolve: (value?: unknown) => void; reject: (reason?: unknown) => void }[] = [];
 
 const processQueue = (error: Error | null) => {
-  console.log('🔁 Processing queue', { queueLength: failedQueue.length, error: error?.message });
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) reject(error);
     else resolve(true);
@@ -22,7 +21,7 @@ interface RetryAxiosRequestConfig extends AxiosRequestConfig {
   _retry?: boolean;
 }
 
-// Request interceptor: no Authorization header needed with HttpOnly cookies
+// Request interceptor: pass through
 axiosInstance.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error)
@@ -33,12 +32,20 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryAxiosRequestConfig;
+    const store = useAuthStore.getState();
+    console.log('store.isloggedout state', store.isLoggedOut)
 
-    // If it's already a retry or a refresh endpoint itself → bail out immediately
+    // If user is already logged out, don't retry
+    if (store.isLoggedOut) {
+      return Promise.reject(error);
+    }
+
+    // Avoid retry loops
     if (originalRequest?._retry || originalRequest?.url?.includes('/auth/refresh')) {
       return Promise.reject(error);
     }
 
+    // Handle 401 (unauthorized)
     if (error.response?.status === 401) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -49,21 +56,19 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log('🔄 Refreshing access token...');
-        await axiosInstance.get('/auth/refresh');
+        const res = await axiosInstance.get('/auth/refresh');
+        const newToken = res.data.accessToken;
+
+        store.setAccessToken?.(newToken); // update in-memory token
         processQueue(null);
+
         originalRequest._retry = true;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error('❌ Refresh failed', refreshError);
         processQueue(refreshError as Error);
 
-        // Avoid recursive logout calls triggering interceptor again
-        const store = useAuthStore.getState();
-        if (store.authUser) {
-          store.logout?.();
-        }
-
+        // Automatic logout: mark reason as 'auto' to suppress toasts
+        store.logout?.('auto');
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -74,8 +79,8 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-
 export default axiosInstance;
+
 
 
 
