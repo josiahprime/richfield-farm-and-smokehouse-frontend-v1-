@@ -15,33 +15,41 @@ import CartSkeleton from "app/components/ui/CartSkeleton";
 const CartPage = () => {
 //Retrieve cart state and actions from Zustand
   const getCart = useCartStore((state)=>state.getCart)
-  const cartItems = useCartStore((state) => state.items);
+  const AuthUserCart = useCartStore((state) => state.items);
+  const guestCart = useCartStore((state)=>state.guestItems)
   const authUser = useAuthStore((state)=>state.authUser)
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const clearCart = useCartStore((state) => state.clearCart);
   const incrementQuantity = useCartStore((state) => state.incrementQuantity);
   const decrementQuantity = useCartStore((state) => state.decrementQuantity);
 
-  // useEffect(() => {
-  //   localStorage.removeItem("cart-storage"); // 💣 clears old persisted cart format
-  //   console.log("🧹 Cleared old cart data from localStorage");
-  // }, []);
 
 
   const [isLoading, setIsLoading] = useState(true);
 
+  // useEffect(() => {
+  //   const fetchCart = async () => {
+  //     if (authUser) {
+  //       setIsLoading(true);
+  //       await getCart();
+  //       setIsLoading(false);
+  //     } else {
+
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   fetchCart();
+  // }, [authUser, getCart]);
+
   useEffect(() => {
-    const fetchCart = async () => {
-      if (authUser) {
+      const fetchCart = async () => {
         setIsLoading(true);
         await getCart();
         setIsLoading(false);
-      } else {
-        setIsLoading(false);
-      }
-    };
-    fetchCart();
-  }, [authUser, getCart]);
+      };
+      fetchCart();
+    }, [authUser, getCart]);
+
 
   useEffect(() => {
     const handleVisibilityChange = async () => {
@@ -69,14 +77,18 @@ const CartPage = () => {
 
 
   
-  console.log(cartItems)
-  console.log("cartItems value:", cartItems);
-  console.log("Type of cartItems:", typeof cartItems);
-  console.log("Is Array?", Array.isArray(cartItems));
-  console.log("Keys (if object):", cartItems && typeof cartItems === "object" ? Object.keys(cartItems) : null);
+  // console.log(cartItems)
+  // console.log("cartItems value:", cartItems);
+  // console.log("Type of cartItems:", typeof cartItems);
+  // console.log("Is Array?", Array.isArray(cartItems));
+  // console.log("Keys (if object):", cartItems && typeof cartItems === "object" ? Object.keys(cartItems) : null);
+  // whichever set applies
+  const cartItems = authUser ? AuthUserCart : guestCart;
 
   const total = cartItems.reduce((sum, item) => sum + item.priceInKobo * item.quantity, 0);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  
 
 
 
@@ -305,7 +317,8 @@ const CartPage = () => {
 
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-gray-800">Subtotal</span>
+                    {/* <span className="text-lg font-bold text-gray-800">Subtotal</span> */}
+                    <span className="text-lg font-bold text-gray-800">Total</span>
                     <span className="text-xl font-bold text-transparent bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text">
                       {formatCurrency(total)}
                     </span>
@@ -314,7 +327,7 @@ const CartPage = () => {
               </div>
 
               <Link
-                href="cart/checkout"
+                href="/cart/checkout"
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-700 text-white py-2 px-4 rounded-xl font-bold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-3 group mb-4"
               >
                 <span>Proceed to Checkout</span>

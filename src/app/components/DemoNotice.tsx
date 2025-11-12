@@ -17,22 +17,15 @@ const DemoNotice: React.FC<DemoNoticeProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 150, damping: 20 }}
-      className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-amber-100 to-amber-50 text-amber-900 border border-amber-300 shadow-lg rounded-xl px-4 sm:px-5 py-3 text-sm sm:text-base font-medium backdrop-blur-sm max-w-xs sm:max-w-sm flex items-start gap-3"
+      className="fixed bottom-20 md:bottom-6 right-6 z-50 bg-white/30 backdrop-blur-md text-gray-900 border border-white/40 shadow-lg rounded-xl px-4 sm:px-5 py-3 text-sm sm:text-base font-medium max-w-xs sm:max-w-sm flex items-start gap-3 animate-pulse-bg"
     >
-      <Info className="w-5 h-5 mt-0.5 flex-shrink-0 text-amber-700" />
-      <p className="leading-snug">{message}</p>
-
-      <button
-        onClick={() => setVisible(false)}
-        className="ml-auto text-amber-600 hover:text-amber-800 transition"
-        aria-label="Close demo notice"
-      >
+      <Info className="w-5 h-5 mt-0.5 flex-shrink-0 text-gray-700" />
+      <p className="leading-snug text-gray-800 animate-shimmer">{message}</p>
+      <button onClick={() => setVisible(false)} className="ml-auto text-gray-700 hover:text-gray-600 transition">
         <X className="w-4 h-4" />
       </button>
     </motion.div>
+
   );
 };
 

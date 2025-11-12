@@ -1,17 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import PopularProductCard from "app/components/PopularProductCard/PopularProductCard";
 import type { Product } from "store/product/productTypes";
-
-
-
-
+import { ProductCard } from "./ProductCard/ProductCard";
 
 interface Props {
   products: Product[];
 }
-
 
 const ProductSlider = ({ products }: Props) => {
   const visibleCount = 5;
@@ -22,7 +17,6 @@ const ProductSlider = ({ products }: Props) => {
 
   const total = products?.length ?? 0;
 
-  // ✅ Wrap in useCallback
   const nextSlide = useCallback(() => {
     if (total === 0) return;
     setAnimating(true);
@@ -49,14 +43,13 @@ const ProductSlider = ({ products }: Props) => {
     });
   }, [products, index, total]);
 
-  // Auto-slide logic
   useEffect(() => {
     if (total === 0) return;
 
     const startAutoSlide = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
-        if (!isHoveredRef.current) nextSlide(); // only slide if not hovered
+        if (!isHoveredRef.current) nextSlide();
       }, 2000);
     };
 
@@ -105,7 +98,17 @@ const ProductSlider = ({ products }: Props) => {
               key={product.id ?? `fallback-${idx}`}
               className="flex-1 min-w-[220px] max-w-[280px] shrink-0"
             >
-              <PopularProductCard product={product} />
+              <ProductCard
+                id={product.id}
+                productName={product.productName}
+                description={product.description}
+                priceInKobo={product.priceInKobo}
+                image={product.images?.[0]?.url ?? ""}   // ✅ FIX: use first image
+                rating={product.rating}
+                unitType={product.unitType}
+                isFavorite={product.isFavorite || false}
+              />
+
             </div>
           ) : null
         )}
@@ -118,6 +121,7 @@ const ProductSlider = ({ products }: Props) => {
       >
         ❮
       </button>
+
       <button
         onClick={nextSlide}
         className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full z-10 hover:bg-gray-600"

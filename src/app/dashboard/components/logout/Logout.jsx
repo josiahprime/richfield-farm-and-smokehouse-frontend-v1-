@@ -1,5 +1,4 @@
 import React from "react";
-import logoutPageImg from '/assets/loginPageImg1.jpg'; // Replace with the appropriate logout image
 
 const Logout = () => {
   return (
@@ -7,7 +6,7 @@ const Logout = () => {
       {/* Left Side */}
       <div
         className="w-1/2 bg-cover bg-center"
-        style={{ backgroundImage: `url(${logoutPageImg})` }}
+        style={{ backgroundImage: `url(https://res.cloudinary.com/djmnjen6v/image/upload/v1762427208/megan-thomas-xMh_ww8HN_Q-unsplash_ip9fgv.jpg)` }}
       >
         <div className="flex flex-col justify-center h-full text-white p-12">
           <h1 className="text-4xl font-bold mb-4">You’ve Logged Out</h1>

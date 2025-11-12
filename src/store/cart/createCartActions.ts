@@ -104,12 +104,20 @@ export const createCartActions = (
 
   clearCart: async () => {
     const authUser = useAuthStore.getState().authUser;
+    
     if (authUser) {
-      try { await axiosInstance.delete('/cart/clear'); } catch (err) { console.error(err); }
+      try {
+        await axiosInstance.delete('/cart/clear');
+        set({ items: [] }); // clear only logged-in cart
+      } catch (err) {
+        console.error('❌ Failed to clear user cart:', err);
+      }
+    } else {
+      set({ guestItems: [] }); // clear only guest cart
+      localStorage.removeItem('cart-storage');
     }
-    set({ items: [], guestItems: [] }); // clear both carts
-    localStorage.removeItem('cart-storage');
   },
+
 
 
   incrementQuantity: async (id: string) => {

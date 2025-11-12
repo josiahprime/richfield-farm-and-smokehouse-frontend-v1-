@@ -90,7 +90,7 @@ const VerifyEmail = () => {
       {/* Right Side (Background Image + Motivation Text) */}
       <div
         className="w-1/2 bg-cover bg-center"
-        style={{ backgroundImage: "url(/images/logout.jpg)" }}
+        style={{ backgroundImage: "url(https://res.cloudinary.com/djmnjen6v/image/upload/v1762427208/ivan-sabayuki-2WmVYrCwEKg-unsplash_nxnys6.jpg)" }}
       >
         <div className="flex flex-col justify-center h-full text-white p-12">
           <h1 className="text-4xl font-bold mb-4">You&apos;re Almost There!</h1>

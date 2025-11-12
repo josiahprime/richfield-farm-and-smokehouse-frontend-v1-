@@ -1,15 +1,15 @@
 'use client'
-import { useDealCountdown } from "../../src/utils/useCountdownToMidnight";
 import { useProductStore } from "store/product/useProductStore";
 import FlashDealCard from "app/dashboard/components/FlashDealCard/FlashDealCard";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import {Truck, Shield, Award, ArrowRight, Clock, Zap, Leaf, Tractor } from "lucide-react";
+import {ArrowRight, Tractor } from "lucide-react";
 import Link from "next/link";
 import Button from "../../src/app/components/Button/Button";
 import PopularProductsCarousel from "app/components/PopularProductsCarousel";
 import HomeSkeleton from "app/components/ui/HomeSkeleton";
 import { useAuthStore } from "store/auth/useAuthStore";
+import MobileProductSlider from "app/components/PopularProducts/PopularProductsSlider";
 
 
 function formatCountdown(ms: number): string {
@@ -25,45 +25,52 @@ const HomePage = () => {
   const router = useRouter()
   const hasFetchedRef = useRef(false);
   const [hasFetched, setHasFetched] = useState(false);
-  const countdown = useDealCountdown();
+  const [countdown, setCountdown] = useState<number | null>(null);
   // const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const fetchDailyDeals = useProductStore((state)=>(state.fetchDailyDeals))
+  const fetchHolidayDeals = useProductStore((state)=>state.fetchHolidayDeals)
   const fetchPopularProducts = useProductStore((state)=>(state.fetchPopularProducts))
   const DailyDeals = useProductStore((state)=>(state.dailyDeals))
   const popularProducts = useProductStore((state)=>(state.popularProducts))
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const HolidayDeals = useProductStore((state)=>state.HolidayDeals)
+
+  const dailyDealEnd = DailyDeals[0]?.discount?.endDate;
+
 
   
   
   useEffect(()=>{
     fetchPopularProducts()
-
   }, [])
+
+  useEffect(()=>{
+    fetchHolidayDeals()
+  }, [])
+
   useEffect(() => {
-    if (!hasFetched) {
-      // 🔄 Fetch immediately on first load
-      fetchDailyDeals();
-      setHasFetched(true);
-    }
+    console.log('fetching daily deals...')
+    fetchDailyDeals();
+  }, []);
 
-    if (countdown === 0 && !hasFetchedRef.current) {
-      console.log('Countdown hit 0. Refetching daily deals...');
-      fetchDailyDeals();
-      hasFetchedRef.current = true;
 
-      // Allow refetch again the next day
-      setTimeout(() => {
-        hasFetchedRef.current = false;
-      }, 2000);
-    }
-  }, [countdown, fetchDailyDeals, hasFetched]);
+  useEffect(() => {
+    if (!DailyDeals || DailyDeals.length === 0) return;
+
+    const end = new Date(DailyDeals[0].discount.endDate).getTime();
+
+    const interval = setInterval(() => {
+      const diff = end - Date.now();
+      setCountdown(diff > 0 ? diff : 0);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [DailyDeals]);
+
 
   if (isCheckingAuth) {
     return <HomeSkeleton />;
   }
-
-
-
 
 
   const bannerDeals = [
@@ -138,43 +145,127 @@ const HomePage = () => {
 
       {/* Flash Deals Section */}
       {DailyDeals && DailyDeals.length > 0 && (
-        <section className="bg-gradient-to-r from-green-600 to-emerald-700 py-8">
+        <section className="py-10">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-white">
-                  <Zap className="w-6 h-6" />
-                  <h2 className="text-2xl font-bold">Daily Fresh Deals</h2>
-                </div>
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white">
-                  <Clock className="w-4 h-4" />
-                  <span className="font-mono font-bold">
-                    {countdown !== null
-                      ? formatCountdown(countdown)
-                      : "Loading..."}
-                  </span>
-                </div>
+
+            {/* Header Row */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-6">
+
+              {/* Left Side Info */}
+              <div>
+                <span className="inline-block px-3 py-1 bg-green-200/60 text-green-900 text-xs font-semibold rounded-full mb-2">
+                  Today only
+                </span>
+
+                <h2 className="text-3xl font-extrabold text-green-900">
+                  Farm Fresh Daily Deals
+                </h2>
+
+                <p className="text-sm text-green-900/80 mt-1 max-w-md">
+                  Hand-picked produce and pantry staples from local farms.
+                  Prices drop for 24 hours. Stock up while they last.
+                </p>
               </div>
 
+              {/* Countdown */}
+              <div className="flex items-center gap-2">
+                {countdown !== null  ? (
+                  formatCountdown(countdown)
+                    .split(":")
+                    .map((value, index) => (
+                      <div
+                        key={index}
+                        className="bg-green-700 text-white px-4 py-2 rounded-lg text-center min-w-[60px]"
+                      >
+                        <p className="text-lg font-bold leading-none">{value}</p>
+                        <p className="text-[10px] uppercase tracking-wide opacity-80">
+                          {index === 0 ? "hours" : index === 1 ? "mins" : "secs"}
+                        </p>
+                      </div>
+                    ))
+                ) : (
+                  <span className="text-green-900">Loading...</span>
+                )}
+              </div>
+
+              {/* View All Button */}
               <Button
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-green-600"
+                variant="ghost"
+                className="text-green-800 hover:bg-green-100 flex items-center gap-2 font-semibold"
               >
                 View All Deals
+                <ArrowRight className="w-4 h-4" />
               </Button>
+
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {DailyDeals.slice(0, 4).map((deal) => (
+            {/* Deals Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              {DailyDeals.slice(0, 5).map((deal) => (
                 <FlashDealCard key={deal.id} deal={deal} />
               ))}
             </div>
+
           </div>
         </section>
       )}
 
+
+      {/* Holiday Discounts Section */}
+      {HolidayDeals && HolidayDeals.length > 0 && (
+        <section className="py-10 bg-white/90">
+          <div className="max-w-7xl mx-auto px-4">
+
+            {/* Header Row */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-6">
+
+              {/* Left Side Info */}
+              <div>
+                <span className="inline-block px-3 py-1 bg-red-200/60 text-red-900 text-xs font-semibold rounded-full mb-2">
+                  Limited Time
+                </span>
+
+                <h2 className="text-3xl font-extrabold text-red-900">
+                  Holiday Discounts Up to 50% Off
+                </h2>
+
+                <p className="text-sm text-red-900/80 mt-1 max-w-md">
+                  Celebrate the season with massive discounts on your favorite products.
+                  Grab them before the holiday season ends!
+                </p>
+
+                <span className="inline-block mt-2 text-red-700 font-medium text-sm">
+                  Ends December 31st
+                </span>
+              </div>
+
+              {/* View All Button */}
+              <Button
+                variant="ghost"
+                className="text-red-800 hover:bg-red-100 flex items-center gap-2 font-semibold mt-4 lg:mt-0"
+              >
+                View All Holiday Deals
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+
+            </div>
+
+            {/* Deals Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              {HolidayDeals.slice(0, 5).map((deal) => (
+                <FlashDealCard key={deal.id} deal={deal} />
+              ))}
+            </div>
+
+          </div>
+        </section>
+      )}
+
+
+
+
       {/* Services Section */}
-      <section className="bg-white py-8 border-t">
+      {/* <section className="bg-white py-8 border-t">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-6">
             {[
@@ -195,26 +286,57 @@ const HomePage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Popular Products */}
-      <section className="bg-white py-8 border-t">
-        <div className="max-w-7xl mx-auto ">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Popular Farm Products</h2>
+      <section className="bg-white py-10">
+        <div className="max-w-7xl mx-auto px-4">
+
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+
+            <div>
+              <span className="inline-block px-3 py-1 bg-green-200/60 text-green-900 text-xs font-semibold rounded-full mb-2">
+                Customer Favorites
+              </span>
+
+              <h2 className="text-3xl font-extrabold text-green-900">
+                Popular Farm Products
+              </h2>
+
+              <p className="text-sm text-green-900/80 mt-1">
+                Fresh picks loved by shoppers across the farm marketplace.
+              </p>
+            </div>
+
             <Link href="/products">
-              <Button variant="outline">View All <ArrowRight className="ml-2 w-4 h-4" /></Button>
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 text-green-800 hover:bg-green-100 font-semibold"
+              >
+                View All
+                <ArrowRight className="w-4 h-4" />
+              </Button>
             </Link>
+
           </div>
 
-          
-          <div>
-            
+        </div>
 
+        {/* Sliders */}
+        <div className="w-full">
+          {/* Desktop slider */}
+          <div className="hidden md:block">
+            <PopularProductsCarousel products={popularProducts} />
+          </div>
+
+          {/* Mobile slider */}
+          <div className="md:hidden">
+            <MobileProductSlider products={popularProducts} />
           </div>
         </div>
-        <PopularProductsCarousel products={popularProducts}/>
       </section>
+
 
 
       {/* Newsletter */}

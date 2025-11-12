@@ -221,17 +221,34 @@ toggleFavorite: async (userId: string, productId: string) => {
   
 
   fetchDailyDeals: async () => {
-    //107257
+    console.log('fetching daily deals from zustand')
     set({ isLoading: true, error: null });
     try {
       const response = await axiosInstance.get('/products/daily-deals');
+      console.log('request sent now response is ', response)
       console.log('fetch daily deals res', response)
       set({ dailyDeals: response.data.dailyDeals, isLoading: false });
     } catch (err) {
+      console.log('daily deals fetch error:', err);
+
       const error = err as AxiosError<{ error: string }>;
       set({ isLoading: false, error: error.message });
     }
+  },
+
+  fetchHolidayDeals: async () => {
+    console.log("Fetching holiday deals from Zustand...");
+    set({ isLoading: true, error: null });
     
+    try {
+      const response = await axiosInstance.get("/products/holiday-deals");
+      console.log("Holiday deals response:", response.data);
+      set({ HolidayDeals: response.data.HolidayDeals, isLoading: false });
+    } catch (err) {
+      console.error("Error fetching holiday deals:", err);
+      const error = err as AxiosError<{ error: string }>;
+      set({ isLoading: false, error: error.message });
+    }
   },
 
   fetchPopularProducts: async () => {

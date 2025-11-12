@@ -19,6 +19,7 @@ export const useProductStore = create<ProductState>()(
     data: null,
     dailyDeals: [],
     popularProducts: [],
+    HolidayDeals: [],
     favorites: [],
     
 

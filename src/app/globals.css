@@ -216,6 +216,54 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
   }
 
+
+
+
+
+
+  /* demo notice animations */
+  /* Container pulse animation */
+  @keyframes pulse-bg {
+    0%, 100% {
+      opacity: 0.9;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Text shimmer animation */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Apply shimmer animation */
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(150, 150, 150, 0.9) 0%,
+      rgba(50, 50, 50, 1) 50%,
+      rgba(150, 150, 150, 0.9) 100%
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: rgba(30, 30, 30, 0.9); /* fallback visible text */
+    animation: shimmer 1.8s linear infinite;
+  }
+
+
+  /* Apply pulse animation to container */
+  .animate-pulse-bg {
+    animation: pulse-bg 2s ease-in-out infinite;
+  }
+
+
   
 
 

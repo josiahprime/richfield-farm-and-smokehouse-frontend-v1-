@@ -31,9 +31,24 @@ const Product = () => {
   if (isLoading) {
     return (
       <div className="w-full h-full flex flex-col md:flex-row pb-20">
-        <div className="hidden lg:inline-flex w-[30%] max-w-[300px] mt-4 h-full shrink-0">
+        {/* <div className="hidden lg:inline-flex w-[30%] max-w-[300px] mt-4 h-full shrink-0">
+          <ShopSideNav />
+        </div> */}
+        <div
+          className="
+            hidden lg:flex 
+            w-[30%] max-w-[300px] mt-4 shrink-0
+            sticky top-24
+            max-h-[calc(100vh-6rem)]
+            overflow-y-auto
+            overflow-x-hidden
+            no-scrollbar
+          "
+        >
           <ShopSideNav />
         </div>
+
+
         <MobileCategoryNav />
         <div className="grid flex-1 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:px-0 mb-0">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -51,9 +66,23 @@ const Product = () => {
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row pb-20">
-      <div className="hidden lg:inline-flex w-[30%] max-w-[300px] mt-4 h-full shrink-0">
+      {/* <div className="hidden lg:inline-flex w-[30%] max-w-[300px] mt-4 h-full shrink-0">
+        <ShopSideNav />
+      </div> */}
+      <div
+        className="
+          hidden lg:flex
+          w-[30%] max-w-[300px] mt-4 shrink-0
+          sticky top-24
+          max-h-[calc(100vh-6rem)]
+          overflow-y-auto
+          no-scrollbar
+        "
+      >
         <ShopSideNav />
       </div>
+
+
 
       <MobileCategoryNav />
 

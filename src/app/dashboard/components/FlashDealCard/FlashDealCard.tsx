@@ -1,146 +1,218 @@
 "use client";
 
-import { ShoppingCart } from "lucide-react";
-import Badge from "app/components/Badge/Badge";
-import Button from "app/components/Button/Button";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import { FiShoppingCart } from "react-icons/fi";
+import { AiFillStar, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { toast } from "react-hot-toast";
+import { useCartStore } from "store/cart/useCartStore";
+import { useAuthStore } from "store/auth/useAuthStore";
+import { useProductStore } from "store/product/useProductStore";
 import { formatCurrency } from "utils/FormatCurrency";
 import { format, isToday, isTomorrow } from "date-fns";
-import { useCartStore } from "store/cart/useCartStore";
-import { toast } from "react-hot-toast";
 import type { DailyDeal } from "store/product/productTypes";
-import Image from "next/image";
+
+// stable rating generator
+const getStableRating = (id: string) => {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const random = Math.abs(hash % 100) / 100;
+  return Math.min(5, Math.max(3, Math.round(random * 4 + 1) / 2 + 2.5));
+};
 
 interface FlashDealCardProps {
   deal: DailyDeal;
 }
 
-const FlashDealCard = ({ deal }: FlashDealCardProps) => {
-  // console.log('deal from flash deal card', deal)
+export default function FlashDealCard({ deal }: FlashDealCardProps) {
   const addToCart = useCartStore((s) => s.addToCart);
-  const { product } = deal;
-  // console.log('deal from product card', deal)
+  const toggleFavorite = useProductStore((s) => s.toggleFavorite);
+  const authUser = useAuthStore((s) => s.authUser);
 
-  // const discountValue = product.discount?.value ?? 0;
-  const discountValue = product.discount?.value ?? 0;
+  const [favorite, setFavorite] = useState(false);
+  const [togglingFav, setTogglingFav] = useState(false);
+  const [cartClicked, setCartClicked] = useState(false);
 
-  // original and discounted prices (priceInKobo is actually Naira per your setup)
-  const originalPrice = product.priceInKobo;
+  const discountValue = deal.discount?.value ?? 0;
+
+  const originalPrice = deal.priceInKobo;
   const discountedPrice = discountValue
     ? Math.round(originalPrice - (originalPrice * discountValue) / 100)
     : originalPrice;
 
-  // first image -> use the same key "image" your ProductCard expects
-  const mainImage = product.images?.[0]?.url || "/placeholder.jpg";
+  const mainImage = deal.images?.[0]?.url || "/placeholder.jpg";
 
-  // expiry formatting
+  const stableRating = useMemo(() => getStableRating(deal.id), [deal.id]);
+
+  // Expiry formatting
   let formattedExpiry: string | null = null;
-  if (deal.expiresAt) {
-    const expiryDate = new Date(deal.expiresAt);
+  if (deal.discount?.endDate) {
+    const expiryDate = new Date(deal.discount.endDate);
     if (isToday(expiryDate)) {
-      formattedExpiry = `Today at ${format(expiryDate, "hh:mm a")}`;
+      formattedExpiry = `Today · ${format(expiryDate, "hh:mm a")}`;
     } else if (isTomorrow(expiryDate)) {
-      formattedExpiry = `Tomorrow at ${format(expiryDate, "hh:mm a")}`;
+      formattedExpiry = `Tomorrow · ${format(expiryDate, "hh:mm a")}`;
     } else {
-      formattedExpiry = format(expiryDate, "MMM d, hh:mm a");
+      formattedExpiry = format(expiryDate, "MMM d · hh:mm a");
     }
   }
 
-  // Build cart item using the SAME shape ProductCard uses
-  const buildCartItem = () => ({
-    id: product.id,
-    productId: product.id,  
-    productName: product.productName,
-    image: mainImage,
-    priceInKobo: discountedPrice,     // NOTE: this is discounted price (same field name)
-    quantity: 1,
-    unitType: product.unitType || "each",
-    discountId: product.discount?.id || undefined,
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCartClicked(true);
 
-    // optional metadata for merging/analytics
-    fromDeal: true,
-    dealId: deal.id,
-    originalPriceInKobo: originalPrice,
-  });
-
-  const handleAddToCart = (e?: React.MouseEvent) => {
-    e?.preventDefault?.();
-    const cartItem = buildCartItem();
-    addToCart(cartItem);
-    toast.success(`${product.productName} added to cart`, {
-      icon: "🛒",
-      duration: 1800,
-      style: { borderRadius: 8, background: "#111", color: "#fff" },
+    addToCart({
+      id: deal.id,
+      productId: deal.id,
+      productName: deal.productName,
+      image: mainImage,
+      priceInKobo: discountedPrice,
+      quantity: 1,
+      unitType: deal.unitType || "each",
+      fromDeal: true,
+      dealId: deal.id,
+      originalPriceInKobo: originalPrice,
     });
+
+    toast.success(`${deal.productName} added to cart!`);
+    setTimeout(() => setCartClicked(false), 300);
+  };
+
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (togglingFav) return;
+
+    if (!authUser?.id) {
+      toast.error("You must be logged in to add to wishlist");
+      return;
+    }
+
+    setTogglingFav(true);
+    try {
+      const res = await toggleFavorite(authUser.id, deal.id);
+      setFavorite(res === "added");
+      toast.success(
+        `${deal.productName} ${res === "added" ? "added to" : "removed from"} wishlist`
+      );
+    } catch {
+      toast.error("Failed to update wishlist");
+    } finally {
+      setTogglingFav(false);
+    }
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 hover:shadow-lg transition-shadow">
-      {/* Image & Badges */}
-      <div className="relative mb-4">
-        <div className="relative w-full h-40 rounded-lg overflow-hidden">
+    <Link href={`/products/${deal.id}`} className="block w-full group">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden h-full flex flex-col relative transition-transform hover:scale-[1.02]">
+
+        {/* IMAGE */}
+        <div className="relative">
           <Image
-            src={mainImage || "/placeholder.jpg"}
-            alt={product.productName}
-            fill
-            className="object-cover rounded-lg"
-            sizes="100vw"
+            src={mainImage}
+            alt={deal.productName}
+            width={400}
+            height={200}
+            className="w-full h-40 sm:h-48 object-cover"
           />
+          
+
+          {/* Discount badge (bottom-right) */}
+          {discountValue > 0 && (
+            <span className="absolute bottom-2 right-2 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded">
+              -{discountValue}%
+            </span>
+          )}
+
+          {/* Favorite (top-left) */}
+          {authUser && (
+            <motion.button
+              whileTap={{ scale: 1.3 }}
+              onClick={handleFavoriteToggle}
+              disabled={togglingFav}
+              className={`absolute top-2 left-2 rounded-full p-1 shadow-md bg-white bg-opacity-90 hover:bg-opacity-100`}
+            >
+              {favorite ? (
+                <AiFillHeart size={20} className="text-red-600" />
+              ) : (
+                <AiOutlineHeart size={20} className="text-gray-600" />
+              )}
+            </motion.button>
+          )}
+
+          {/* Add to cart (top-right) */}
+          <motion.button
+            whileTap={{ scale: 1.3 }}
+            animate={cartClicked ? { scale: 1.2 } : { scale: 1 }}
+            onClick={handleAddToCart}
+            className="absolute top-2 right-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-1 shadow-md"
+          >
+            <FiShoppingCart size={20} className="text-teal-900" />
+          </motion.button>
         </div>
 
-        <div className="absolute top-2 left-2 flex gap-1">
-          {discountValue > 0 && (
-            <Badge className="bg-red-500 text-white text-xs">
-              {product.discount?.label || `-${discountValue}%`}
-            </Badge>
-          )}
-          {product.displayLabel && (
-            <Badge className="bg-green-500 text-white text-xs">
-              {product.displayLabel.replace("_", " ")}
-            </Badge>
-          )}
-        </div>
-      </div>
 
-      {/* Title */}
-      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-        {product.productName}
-      </h3>
+        {/* DETAILS */}
+        <div className="p-3 sm:p-4 flex-1 flex flex-col">
 
-      {/* Category */}
-      <p className="text-xs text-gray-500 capitalize mb-3">
-        {product.category.replace("-", " ")}
-      </p>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 line-clamp-2">
+            {deal.productName}
+          </h2>
 
-      {/* Pricing + add-to-cart */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-green-600">
-            {formatCurrency(discountedPrice)}
-          </span>
-          {discountValue > 0 && (
-            <span className="text-sm text-gray-500 line-through">
-              {formatCurrency(originalPrice)}
+          {/* <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-3">
+            {deal.description}
+          </p> */}
+
+          {/* Rating */}
+          <div className="flex items-center mb-1 gap-1 text-yellow-500 text-xs sm:text-sm">
+            {Array.from({ length: 5 }, (_, i) => {
+              const full = i + 1 <= Math.floor(stableRating);
+              const half = stableRating - i > 0 && stableRating - i < 1;
+              return (
+                <AiFillStar
+                  key={i}
+                  className={
+                    full
+                      ? "fill-current"
+                      : half
+                      ? "text-yellow-400 opacity-60"
+                      : "text-gray-300"
+                  }
+                />
+              );
+            })}
+            <span className="text-gray-500 text-[10px] sm:text-xs ml-1">
+              ({stableRating.toFixed(1)})
+            </span>
+          </div>
+
+          {/* PRICE */}
+          <div className="mt-auto flex items-center gap-3">
+            <span className="text-green-600 font-bold text-sm sm:text-base">
+              {formatCurrency(discountedPrice)}
+              <span className="text-[10px] sm:text-xs text-gray-500 ml-1">
+                /{deal.unitType || "each"}
+              </span>
+            </span>
+
+            {discountValue > 0 && (
+              <span className="line-through text-[11px] sm:text-sm text-gray-400">
+                {formatCurrency(originalPrice)}
+              </span>
+            )}
+          </div>
+
+          {/* Expiry */}
+          {formattedExpiry && (
+            <span className="text-[11px] font-bold text-red-600 mt-1">
+              Ends: {formattedExpiry}
             </span>
           )}
         </div>
-
-        <Button
-          size="sm"
-          className="bg-green-500 hover:bg-green-600 text-white"
-          onClick={handleAddToCart}
-        >
-          <ShoppingCart className="w-3 h-3" />
-        </Button>
       </div>
-
-      {/* Expiry */}
-      {formattedExpiry && (
-        <span className="text-[10px] text-gray-400 block text-right">
-          Expires: {formattedExpiry}
-        </span>
-      )}
-    </div>
+    </Link>
   );
-};
-
-export default FlashDealCard;
+}

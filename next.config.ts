@@ -2,12 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["encrypted-tbn0.gstatic.com", "res.cloudinary.com"],
     remotePatterns: [
-      { protocol: "https", hostname: "source.unsplash.com" },
-      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "encrypted-tbn0.gstatic.com", pathname: "/**" },
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
+      { protocol: "https", hostname: "source.unsplash.com", pathname: "/**" },
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com", pathname: "/**" },
     ],
   },
+
 
   async rewrites() {
     const backend =

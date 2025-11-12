@@ -10,6 +10,18 @@ import { FiShoppingCart } from 'react-icons/fi';
 import { AiFillStar, AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { motion } from 'framer-motion';
 
+export type Discount = {
+  id: string;
+  type: "PERCENTAGE" | "FIXED";
+  value: number;
+  label: string;
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+};
+
+
 type Product = {
   productName: string;
   description: string;
@@ -19,6 +31,7 @@ type Product = {
   rating?: number;
   unitType: string; // e.g. 'per lb', 'each', etc.
   isFavorite: boolean;
+  discount: Discount
 };
 
 // Utility: consistent pseudo-random rating based on product ID
@@ -32,7 +45,7 @@ const getStableRating = (id: string) => {
   return Math.min(5, Math.max(3, Math.round(random * 4 + 1) / 2 + 2.5)); // e.g. 3.0–5.0 range
 };
 
-function ProductCard({
+export const ProductCard: React.FC<Product> = ({
   productName,
   description,
   id,
@@ -41,7 +54,8 @@ function ProductCard({
   rating,
   unitType,
   isFavorite,
-}: Product) {
+  discount
+}: Product) => {
   const [cartClicked, setCartClicked] = useState(false);
   const [localFavorite, setLocalFavorite] = useState(isFavorite);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -49,6 +63,21 @@ function ProductCard({
   const toggleFavorite = useProductStore((state) => state.toggleFavorite);
   const authUser = useAuthStore((state) => state.authUser);
   const userId = authUser?.id;
+  
+
+  const hasDiscount = discount && discount.isActive;
+
+  let discountedPrice = priceInKobo;
+  if (hasDiscount) {
+    if (discount.type === "PERCENTAGE") {
+      discountedPrice = Math.round(
+        priceInKobo - priceInKobo * (discount.value / 100)
+      );
+    } else if (discount.type === "FIXED") {
+      discountedPrice = Math.max(0, priceInKobo - discount.value);
+    }
+  }
+
 
   // Stable rating (DB value if exists, else generated)
   const stableRating = useMemo(
@@ -118,13 +147,15 @@ function ProductCard({
             />
           )}
 
-          <span
-            className={`absolute bottom-2 right-2 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded ${
-              priceInKobo < 20 ? 'bg-green-600' : 'bg-red-500'
-            }`}
-          >
-            {priceInKobo < 20 ? 'NEW' : 'SALE'}
-          </span>
+          {hasDiscount && (
+            <span
+              className="absolute bottom-2 right-2 bg-red-600 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded"
+            >
+              -{discount.value}
+              {discount.type === "PERCENTAGE" ? "%" : " NGN"}
+            </span>
+          )}
+
 
           {authUser && (
             <motion.button
@@ -189,15 +220,25 @@ function ProductCard({
 
             <div className="flex items-center gap-3">
               <span className="text-green-600 font-bold text-[12px] md:text-sm sm:text-base">
-                {formatCurrency(priceInKobo)}
+                {formatCurrency(hasDiscount ? discountedPrice : priceInKobo)}
                 <span className="text-[10px] sm:text-xs text-gray-500 ml-1">
                   /{unitType}
                 </span>
               </span>
-              <span className="line-through text-[11px] sm:text-sm text-gray-400">
-                {formatCurrency(priceInKobo + 10250)}
-              </span>
+
+              {hasDiscount && (
+                <span className="line-through text-[11px] sm:text-sm text-gray-400">
+                  {formatCurrency(priceInKobo)}
+                </span>
+              )}
+
+              {/* {hasDiscount && (
+                <span className="text-red-500 text-[10px] sm:text-xs font-semibold">
+                  -{discount.value}%
+                </span>
+              )} */}
             </div>
+
           </div>
         </div>
       </div>
@@ -206,4 +247,3 @@ function ProductCard({
   );
 }
 
-export default ProductCard;

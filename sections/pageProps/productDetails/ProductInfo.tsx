@@ -57,10 +57,6 @@ interface ProductInfoProps {
 
   
 
-  // const handleAddToCart = () => {
-  //   toast.success(`${productInfo.productName} added to cart! Quantity: ${quantity}`);
-  // };
-
   // ✅ FIXED FUNCTION
   const handleAddToCart = () => {
     addToCart({
@@ -147,12 +143,15 @@ interface ProductInfoProps {
                 <ArrowRight className="w-3 h-3 text-gray-700" />
               </button>
 
-              {/* Sale Badge */}
-              <div className="absolute top-3 left-3">
-                <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 text-xs font-semibold">
-                  25% OFF
-                </Badge>
-              </div>
+              {/* Discount Badge */}
+              {productInfo.discount?.value && (
+                <div className="absolute top-3 left-3">
+                  <div className="bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold shadow">
+                    {productInfo.discount.value}% OFF
+                  </div>
+                </div>
+              )}
+
             </div>
 
             {/* Thumbnails */}
@@ -203,16 +202,46 @@ interface ProductInfoProps {
 
 
             <div className="flex items-baseline gap-2">
+              {/* Final price (after discount if any) */}
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                {formatCurrency(productInfo.priceInKobo)}
+                {formatCurrency(
+                  productInfo.discount?.isActive
+                    ? productInfo.discount.type === "PERCENTAGE"
+                      ? Math.round(
+                          productInfo.priceInKobo -
+                          productInfo.priceInKobo * (productInfo.discount.value / 100)
+                        )
+                      : Math.max(
+                          0,
+                          productInfo.priceInKobo - productInfo.discount.value
+                        )
+                    : productInfo.priceInKobo
+                )}
               </span>
-              <span className="text-sm text-gray-400 line-through">
-                {formatCurrency(productInfo.priceInKobo + 8333)}
-              </span>
-              <Badge className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 border-green-300 text-xs">
-                Save ₦833
-              </Badge>
+
+              {/* Old price */}
+              {productInfo.discount?.isActive && (
+                <span className="text-sm text-gray-400 line-through">
+                  {formatCurrency(productInfo.priceInKobo)}
+                </span>
+              )}
+
+              {/* Savings badge */}
+              {productInfo.discount?.isActive && (
+                <div className="bg-green-100 text-green-700 border border-green-300 px-2 py-0.5 rounded text-xs font-semibold">
+                  Save{" "}
+                  {formatCurrency(
+                    productInfo.discount.type === "PERCENTAGE"
+                      ? Math.round(
+                          productInfo.priceInKobo *
+                          (productInfo.discount.value / 100)
+                        )
+                      : productInfo.discount.value
+                  )}
+                </div>
+              )}
             </div>
+
 
             <p className="text-gray-600 leading-relaxed text-xs">{productInfo.description}</p>
 

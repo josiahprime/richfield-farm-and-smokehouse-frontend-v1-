@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useMemo } from 'react';
 import { useProductStore } from 'store/product/useProductStore';
-import ProductCard from 'app/components/ProductCard/ProductCard';
+import { ProductCard } from 'app/components/ProductCard/ProductCard';
 import { motion } from 'framer-motion';
 import Button from 'app/components/Button/Button';
 

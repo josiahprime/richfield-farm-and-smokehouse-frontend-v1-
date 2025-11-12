@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useCartStore } from "store/cart/useCartStore";
 import { useCheckoutStore } from "store/checkout/useCheckoutStore";
-import { ShoppingBag, CreditCard, Package, CheckCircle, Lock, Star } from "lucide-react";
+import { ShoppingBag, CreditCard, Package, CheckCircle, Lock, Star, X } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import OrderSummary from "app/components/Checkout/OrderSummary";
 import ShippingForm from "app/components/Checkout/ShippingForm";
 import PaymentSection from "app/components/Checkout/PaymentSection";
@@ -41,6 +42,8 @@ const CheckoutPage = () => {
 
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [showSummary, setShowSummary] = useState(false);
+
   console.log('items', items)
 
   const [formData, setFormData] = useState<Record<FormField, string>>({
@@ -215,10 +218,15 @@ const CheckoutPage = () => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Order Summary first on mobile, right side on desktop */}
-          <div className="order-1 lg:order-2 lg:col-span-1">
+          {/* Order Summary sidebar for desktop */}
+          <div className="hidden lg:block lg:col-span-1">
             <OrderSummary items={cartItems} amount={amount} calculationDone={calculationDone} />
           </div>
+          {/* <div className="order-1 lg:order-2 lg:col-span-1">
+            <OrderSummary items={cartItems} amount={amount} calculationDone={calculationDone} />
+          </div> */}
+
+
 
           {/* Shipping & Payment Sections */}
           <div className="order-2 lg:order-1 lg:col-span-2 space-y-8">
@@ -268,6 +276,92 @@ const CheckoutPage = () => {
           </div>
         </div>
       </div>
+
+      
+
+
+      {/* Floating Full-Width Pill Footer */}
+      <div className="fixed bottom-4 left-0 right-0 z-50 lg:hidden flex justify-center">
+        {/* Full-width pill background */}
+        <div className="relative w-[97%] bg-white rounded-3xl shadow-md px-6 py-7 flex text-center justify-center items-center">
+          
+          {/* Floating ShoppingBag Icon */}
+          <div className="flex flex-col items-center justify-center">
+              <button
+              onClick={() => setShowSummary(true)}
+              className="absolute -top-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
+            >
+              <ShoppingBag className="w-5 h-5" />
+            </button>
+
+            {/* Text inside the pill */}
+            {/* Text inside the pill with subtle pop animation */}
+            <motion.span
+              initial={{ y: 5, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="text-green-600 font-semibold text-sm absolute bottom-2"
+            >
+              View Order
+            </motion.span>
+          </div>
+        </div>
+      </div>
+
+
+
+      {/* ==============================
+        Slide-up Bottom Sheet (Framer Motion)
+        ============================== */}
+      <AnimatePresence>
+        {showSummary && (
+          <motion.div 
+            className="fixed inset-0 z-50 flex items-end justify-center lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Overlay */}
+            <div 
+              className="absolute inset-0 bg-black/40" 
+              onClick={() => setShowSummary(false)}
+            />
+
+            {/* Bottom sheet */}
+            <motion.div
+              className="bg-white w-full max-h-[70vh] rounded-t-3xl p-6 shadow-2xl overflow-y-auto no-scrollbar relative z-10"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              {/* Drag Handle */}
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
+
+              {/* Header with close icon */}
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">Order Summary</h2>
+                <button 
+                  onClick={() => setShowSummary(false)}
+                  className="p-2 rounded-full hover:bg-gray-100 transition"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Actual summary */}
+              <OrderSummary 
+                items={cartItems} 
+                amount={amount} 
+                calculationDone={calculationDone} 
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+
     </div>
   );
 };

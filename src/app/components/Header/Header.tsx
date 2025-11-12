@@ -36,6 +36,7 @@ const Header = () => {
 
   const hideOnMobile = isProfilePage ? "hidden md:block" : "";
   console.log('is checking auth from header',isCheckingAuth)
+  
 
   // 👉 If not authenticated and not checking, show skeleton (desktop only)
   if (isCheckingAuth) {

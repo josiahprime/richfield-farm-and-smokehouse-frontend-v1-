@@ -1,14 +1,21 @@
 "use client"
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useRef } from 'react';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useRouter } from 'next/navigation'; // ✅ correct in app directory
-import Image from "next/image";
 import toast from "react-hot-toast";
 import { useAuthStore } from "store/auth/useAuthStore";
+import SignupMobile from 'app/components/Signup/SignupMobile';
+import MobileCheckSkeleton from 'app/components/ui/MobileCheckSkeleton';
 
-// site key: 
+
+
+type GoogleCredentialResponse = {
+  credential: string;
+  select_by?: string;
+};
+
 
 // secret key: 
 const Signup = () => {
@@ -18,7 +25,9 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const signup = useAuthStore((state) => state.signup);
+  const signupWithGoogle = useAuthStore((state)=>state.signupWithGoogle)
   const isSigningUp = useAuthStore((state) => state.isSigningUp);
+  const [isMobile, setIsMobile] = useState<null | boolean>(null);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -27,12 +36,77 @@ const Signup = () => {
     confirmPassword: "",
   });
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleGoogleResponse = async (response: GoogleCredentialResponse) => {
+    try {
+      const credential = response.credential;
+
+      const result = await signupWithGoogle({
+        googleToken: credential
+      });
+
+      if (result?.success) {
+        toast.success("Signed in with Google!");
+        router.push("/");
+      } else {
+        toast.error(result?.message || "Google signup failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong with Google login.");
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (window.google?.accounts?.id) {
+        const el = document.getElementById("g_id_signin");
+        if (el) {
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            callback: handleGoogleResponse
+          });
+          window.google.accounts.id.renderButton(el, {
+            theme: "outline",
+            size: "large",
+            width: 350
+          });
+          clearInterval(interval);
+        }
+      }
+    }, 100); // check every 100ms until google.accounts.id exists
+
+    return () => clearInterval(interval);
+  }, []);
+
+
+
+
+
+
   
 
 
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "username" && value.includes(" ")) {
+      toast.error("Username cannot contain spaces.");
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log('login button clicked')
@@ -49,11 +123,11 @@ const Signup = () => {
       console.warn("⚠️ recaptchaRef is null");
     }
 
-
-
-
-    // const token = await recaptchaRef.current.executeAsync();
-    // recaptchaRef.current.reset()
+    // 🚫 Check for spaces in username
+    if (formData.username.includes(" ")) {
+      toast.error("Username cannot contain spaces. Please use letters, numbers, or underscores.");
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
@@ -77,136 +151,148 @@ const Signup = () => {
     }
   };
 
+  if (isMobile === null) return <MobileCheckSkeleton/>;
+
   return (
-    <div className="flex h-screen">
-      {/* Left Side */}
-      <div className="w-1/2 flex items-center justify-center bg-gray-50">
-        <div className="w-96">
-          <div className="uppercase text-2xl font-bold mb-4">
-            Rich<span className="text-green-500">Field</span>
-          </div>
+    <>
+    {isMobile ? (
+      <SignupMobile />
+    ) : 
+      (<div className="flex flex-col md:flex-row h-screen">
+        {/* Left Side */}
+        <div className="md:w-1/2 w-full flex items-center justify-center bg-gray-50">
+          <div className="w-96">
+            <div className="uppercase text-2xl font-bold mb-4">
+              Rich<span className="text-green-500">Field</span>
+            </div>
 
-          <h3 className="text-xl mb-4 mt-2 text-black">Sign Up</h3>
-          <p className="mb-6 text-gray-600">Create your account to get started.</p>
+            <h3 className="text-xl mb-4 mt-2 text-black">Sign Up</h3>
+            <p className="mb-6 text-gray-600">Create your account to get started.</p>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          {/* Form */}
-          <div>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
+            {/* Form */}
+            <div>
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <div>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
 
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-3 text-gray-500"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-3 text-gray-500"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                  </button>
+                </div>
+
                 <button
-                  type="button"
-                  className="absolute right-3 top-3 text-gray-500"
-                  onClick={() => setShowPassword(!showPassword)}
+                  type="submit"
+                  disabled={isSigningUp}
+                  className={`w-full bg-black text-white py-3 rounded-md font-semibold ${
+                    isSigningUp ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
-                  {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                  {isSigningUp ? "Signing Up..." : "Sign Up"}
                 </button>
-              </div>
+              </form>
 
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-gray-500"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
-                </button>
-              </div>
+              {/* Hidden reCAPTCHA */}
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_FRONTEND_KEY || ''}
+                size="invisible"
+                className='right-20'
+              />
+            </div>
 
+            <div className="flex items-center my-4">
+              <div className="border-t flex-grow"></div>
+              <span className="px-4 text-gray-500">or</span>
+              <div className="border-t flex-grow"></div>
+            </div>
+
+            {/* <button className="w-full border py-3 rounded-md font-semibold flex items-center justify-center">
+              <Image src="https://res.cloudinary.com/djmnjen6v/image/upload/v1762093061/googleIcon_ycpzgf.png" alt="Google logo" width={24} height={24} className="mr-2" />
+              Sign up with Google
+            </button> */}
+            <div className="flex justify-center my-4">
+              <div id="g_id_signin"></div>
+            </div>
+
+
+
+            <p className="text-center text-gray-600 mt-6">
+              Already have an account?{" "}
               <button
-                type="submit"
-                disabled={isSigningUp}
-                className={`w-full bg-black text-white py-3 rounded-md font-semibold ${
-                  isSigningUp ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                type="button"
+                className="text-blue-500 underline"
+                onClick={() => router.push("/login")}
               >
-                {isSigningUp ? "Signing Up..." : "Sign Up"}
+                Log in
               </button>
-            </form>
-
-            {/* Hidden reCAPTCHA */}
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_FRONTEND_KEY || ''}
-              size="invisible"
-              className='right-20'
-            />
+            </p>
           </div>
+        </div>
 
-          <div className="flex items-center my-4">
-            <div className="border-t flex-grow"></div>
-            <span className="px-4 text-gray-500">or</span>
-            <div className="border-t flex-grow"></div>
+        {/* Right Side */}
+        <div className="md:w-1/2 w-full bg-cover bg-center h-64 md:h-auto" style={{ backgroundImage: "url(https://res.cloudinary.com/djmnjen6v/image/upload/v1762093796/orange_jz5thl.jpg)" }}>
+          <div className="flex flex-col justify-center h-full text-white p-12">
+            <h1 className="text-4xl font-bold mb-4">Buy and sell farm produce with ease</h1>
+            <p className="text-lg">Join the marketplace that connects local farmers and fresh food lovers.</p>
           </div>
-
-          <button className="w-full border py-3 rounded-md font-semibold flex items-center justify-center">
-            <Image src="https://res.cloudinary.com/djmnjen6v/image/upload/v1762093061/googleIcon_ycpzgf.png" alt="Google logo" width={24} height={24} className="mr-2" />
-            Sign up with Google
-          </button>
-
-          <p className="text-center text-gray-600 mt-6">
-            Already have an account?{" "}
-            <button
-              type="button"
-              className="text-blue-500 underline"
-              onClick={() => router.push("/login")}
-            >
-              Log in
-            </button>
-          </p>
         </div>
-      </div>
-
-      {/* Right Side */}
-      <div className="w-1/2 bg-cover bg-center" style={{ backgroundImage: "url(https://res.cloudinary.com/djmnjen6v/image/upload/v1762093796/orange_jz5thl.jpg)" }}>
-        <div className="flex flex-col justify-center h-full text-white p-12">
-          <h1 className="text-4xl font-bold mb-4">Buy and sell farm produce with ease</h1>
-          <p className="text-lg">Join the marketplace that connects local farmers and fresh food lovers.</p>
-        </div>
-      </div>
-    </div>
+      </div>)}
+    </>
   );
 };
 

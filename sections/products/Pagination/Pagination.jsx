@@ -1,6 +1,7 @@
 "use client";
 
-import ProductCard from "../../../src/app/components/ProductCard/ProductCard";
+import {ProductCard} from "app/components/ProductCard/ProductCard";
+
 import { InfiniteScroll } from "app/components/InfiniteScroll";
 import ProductCardSkeleton from "app/components/ui/ProductCardSkeleton";
 
@@ -37,6 +38,7 @@ const PaginatedProducts = ({ products }) => {
             priceInKobo={product.priceInKobo}
             unitType={product.unitType}
             isFavorite={product.isFavorite}
+            discount={product.discount}
           />
         )}
       />

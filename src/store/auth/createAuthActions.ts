@@ -51,24 +51,65 @@ export const createAuthActions: StateCreator<
   },
 
 
-  signup: async (data: SignupPayload) => {
+  // signup: async (data: SignupPayload) => {
+  //   set({ isSigningUp: true });
+  //   try {
+  //     const res = await axiosInstance.post('/auth/signup', data);
+  //     return {
+  //       success: true,
+  //       message: res.data.message || 'User registered successfully. Check your email.',
+  //     };
+  //   } catch (err) {
+  //     const error = err as AxiosError<{ error: string }>;
+  //     return {
+  //       success: false,
+  //       message: error?.response?.data?.error || 'Signup failed',
+  //     };
+  //   } finally {
+  //     set({ isSigningUp: false });
+  //   }
+  // },
+
+  signup: async (data: SignupPayload) => { 
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post('/auth/signup', data);
+
+      // Check if backend sent a redirect
+      if (res.data.redirectTo) {
+        // redirect immediately
+        window.location.href = res.data.redirectTo; 
+        return {
+          success: false, // optional, because user is redirected
+          message: res.data.message,
+        };
+      }
+
       return {
         success: true,
         message: res.data.message || 'User registered successfully. Check your email.',
       };
     } catch (err) {
-      const error = err as AxiosError<{ error: string }>;
+      const error = err as AxiosError<{ error?: string; message?: string; redirectTo?: string }>;
+      
+      // also handle redirect in case of error response
+      if (error?.response?.data?.redirectTo) {
+        window.location.href = error.response.data.redirectTo;
+        return {
+          success: false,
+          message: error.response.data.message || 'Redirecting...',
+        };
+      }
+
       return {
         success: false,
-        message: error?.response?.data?.error || 'Signup failed',
+        message: error?.response?.data?.message || error?.response?.data?.error || 'Signup failed',
       };
     } finally {
       set({ isSigningUp: false });
     }
   },
+
 
   login: async (data: LoginPayload) => {
     set({ isLoggingIn: true });
@@ -91,9 +132,6 @@ export const createAuthActions: StateCreator<
       });
 
       
-      // Save in memory (Zustand)
-      // set({ accessToken: token, authUser: res.data.user });
-
       // Sync local cart with backend
       const cart = useCartStore.getState();
       await cart.mergeCart();
@@ -101,13 +139,54 @@ export const createAuthActions: StateCreator<
       toast.success('Logged in successfully');
       return true;
     } catch (err) {
-      const error = err as AxiosError<{ error: string }>;
-      console.log(error.response?.data?.error || 'Login failed');
+      const error = err as AxiosError<{ message?: string }>;
+      const status = error.response?.status;
+
+      if (status === 403) {
+        toast.error(error.response?.data?.message || 'Please verify your email first.');
+      } else if (status === 400) {
+        toast.error(error.response?.data?.message || 'Invalid credentials');
+      } else {
+        toast.error('Login failed. Try again.');
+      }
       return false;
-    } finally {
-      set({ isLoggingIn: false });
     }
   },
+
+  signupWithGoogle: async ({ googleToken }) => {
+    set({ isSigningUp: true });
+    try {
+      const res = await axiosInstance.post("/auth/google-signup", {
+        googleToken
+      });
+
+      if (res.data.success) {
+        set({
+          authUser: res.data.user,
+          accessToken: res.data.accessToken,
+          isLoggedOut: false
+        });
+      }
+
+      // Sync local cart with backend
+      const cart = useCartStore.getState();
+      await cart.mergeCart();
+
+      toast.success('Logged in successfully');
+
+      return res.data;
+
+    } catch (err) {
+      const error = err as AxiosError<{ error: string }>;
+      return {
+        success: false,
+        message: error?.response?.data?.error || "Google signup failed"
+      };
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+
 
 
   // login: async (data: LoginPayload) => {

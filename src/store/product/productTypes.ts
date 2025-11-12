@@ -40,14 +40,50 @@ export interface Product {
   displayLabel?: string;
 }
 
-export interface DailyDeal {
-  id: number;
-  productId: string;
-  dealDate: string;
-  expiresAt: string;
-  createdAt: string;
-  product: Product;
+// export interface DailyDeal {
+//   id: number;
+//   productId: string;
+//   dealDate: string;
+//   expiresAt: string;
+//   createdAt: string;
+//   product: Product;
+// }
+export interface DailyDeal{
+  id: string;
+  productName: string;
+  description: string;
+  priceInKobo: number;
+  unitType: string;
+  discount: {
+    value: number;
+    type: 'PERCENTAGE' | 'FIXED';
+    label: string;
+    startDate: string;
+    endDate: string;
+  };
+  images: {
+    url: string;
+  }[];
 }
+
+export interface HolidayDeals{
+  id: string;
+  productName: string;
+  description: string;
+  priceInKobo: number;
+  unitType: string;
+  discount: {
+    value: number;
+    type: 'PERCENTAGE' | 'FIXED';
+    label: string;
+    startDate: string;
+    endDate: string;
+  };
+  images: {
+    url: string;
+  }[];
+}
+
 
 export interface ProductFormData {
   id: string;
@@ -110,6 +146,7 @@ export interface ProductSlice {
   products: Product[] | null;
   singleProduct?: Product | null; // ✅ add this
   dailyDeals: DailyDeal[];
+  HolidayDeals: HolidayDeals[];
   popularProducts: Product[];
   favorites: Product[];
   isCreatingProduct: boolean;
@@ -134,6 +171,7 @@ export interface ProductActions {
   fetchProductById: (id: string, userId?: string) => Promise<void>;
 
   fetchDailyDeals: () => Promise<void>;
+  fetchHolidayDeals: () => Promise<void>;
   fetchPopularProducts: () => Promise<void>;
   deleteProduct: (productId: string) => Promise<boolean>;
   updateProduct: (payload: FormData) => Promise<boolean>;
