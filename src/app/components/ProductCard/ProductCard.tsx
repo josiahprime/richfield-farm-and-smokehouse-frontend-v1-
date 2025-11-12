@@ -31,7 +31,7 @@ type Product = {
   rating?: number;
   unitType: string; // e.g. 'per lb', 'each', etc.
   isFavorite: boolean;
-  discount: Discount
+  discount?: Discount
 };
 
 // Utility: consistent pseudo-random rating based on product ID

@@ -7,7 +7,6 @@ import { axiosInstance } from '../../lib/axios';
 import { useAuthStore } from './useAuthStore';
 import { useCartStore } from 'store/cart/useCartStore';
 import { AxiosError } from 'axios';
-import { persist } from 'zustand/middleware';
 import {
   AuthSlice,
   AuthActions,

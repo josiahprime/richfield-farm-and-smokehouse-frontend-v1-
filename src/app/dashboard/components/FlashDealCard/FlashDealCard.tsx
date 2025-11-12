@@ -73,9 +73,6 @@ export default function FlashDealCard({ deal }: FlashDealCardProps) {
       priceInKobo: discountedPrice,
       quantity: 1,
       unitType: deal.unitType || "each",
-      fromDeal: true,
-      dealId: deal.id,
-      originalPriceInKobo: originalPrice,
     });
 
     toast.success(`${deal.productName} added to cart!`);

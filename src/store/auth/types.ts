@@ -82,7 +82,7 @@ export interface AuthActions {
   setAccessToken: (token: string | null) => void;
   clearAccessToken: () => void;
   refreshAccessToken: () => Promise<string>; // ✅ add this
-  signupWithGoogle: (data: { googleToken: string }) => Promise<any>;
+  signupWithGoogle: (data: { googleToken: string }) => Promise<void>;
 }
 
 export type AuthStoreWithPersist = AuthState & {

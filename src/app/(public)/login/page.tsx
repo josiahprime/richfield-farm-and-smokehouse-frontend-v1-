@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "store/auth/useAuthStore";
 import LoginMobile from "app/components/Login/LoginMobile";
@@ -34,25 +33,31 @@ const Login = () => {
       return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-  const handleGoogleResponse = async (response: GoogleCredentialResponse) => {
-    try {
-      const credential = response.credential;
+    const handleGoogleResponse = useCallback(
+      async (response: GoogleCredentialResponse) => {
+        try {
+          const credential = response.credential;
 
-      const result = await signupWithGoogle({
-        googleToken: credential
-      });
+          const result = await signupWithGoogle({
+            googleToken: credential,
+          });
 
-      if (result?.success) {
-        toast.success("Signed in with Google!");
-        router.push("/");
-      } else {
-        toast.error(result?.message || "Google signup failed.");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong with Google login.");
-    }
-  };
+          if (result?.success) {
+            toast.success("Signed in with Google!");
+            router.push("/");
+          } else {
+            toast.error(result?.message || "Google signup failed.");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Something went wrong with Google login.");
+        }
+      },
+      [signupWithGoogle, router] // include all external variables used inside
+    );
+
+
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,20 +66,21 @@ const Login = () => {
         if (el) {
           window.google.accounts.id.initialize({
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-            callback: handleGoogleResponse
+            callback: handleGoogleResponse,
           });
           window.google.accounts.id.renderButton(el, {
             theme: "outline",
             size: "large",
-            width: 350
+            width: 350,
           });
           clearInterval(interval);
         }
       }
-    }, 100); // check every 100ms until google.accounts.id exists
+    }, 100);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [handleGoogleResponse]);
+
 
 
   useEffect(() => {

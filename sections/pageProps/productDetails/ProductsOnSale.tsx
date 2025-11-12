@@ -66,6 +66,7 @@ const ProductsOnSale = () => {
             rating={item.rating}
             unitType={item.unitType || 'each'}
             isFavorite={item.isFavorite || false}
+            discount={item.discount}
           />
         ))}
       </motion.div>
