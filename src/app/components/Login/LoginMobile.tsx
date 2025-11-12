@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -28,49 +28,56 @@ const LoginMobile = () => {
   const signupWithGoogle = useAuthStore((state)=>state.signupWithGoogle)
   const error = searchParams.get("error");
 
-  const handleGoogleResponse = async (response: GoogleCredentialResponse) => {
-    try {
-      const credential = response.credential;
+  const handleGoogleResponse = useCallback(
+    async (response: GoogleCredentialResponse) => {
+      try {
+        const credential = response.credential;
 
-      const result = await signupWithGoogle({
-        googleToken: credential
-      });
+        const result = await signupWithGoogle({
+          googleToken: credential,
+        });
 
-      if (result?.success) {
-        toast.success("Signed in with Google!");
-        router.push("/");
-      } else {
-        toast.error(result?.message || "Google signup failed.");
+        if (result?.success) {
+          toast.success("Signed in with Google!");
+          router.push("/");
+        } else {
+          toast.error(result?.message || "Google signup failed.");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Something went wrong with Google login.");
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong with Google login.");
-    }
-  };
+    },
+    [signupWithGoogle, router] // include all external variables used inside
+  );
 
   useEffect(() => {
-    const el = document.getElementById("g_id_signin");
-    if (!el) return;
+    const interval = setInterval(() => {
+      if (window.google?.accounts?.id) {
+        const el = document.getElementById("g_id_signin");
+        if (el) {
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+            callback: handleGoogleResponse,
+          });
+          window.google.accounts.id.renderButton(el, {
+            theme: "outline",
+            size: "large",
+            width: 350,
+          });
+          clearInterval(interval);
+        }
+      }
+    }, 100);
 
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse
-      });
-
-      window.google.accounts.id.renderButton(el, {
-        theme: "outline",
-        size: "large",
-        width: 350
-      });
-    }
-  }, []);
+    return () => clearInterval(interval);
+  }, [handleGoogleResponse]);
 
   useEffect(() => {
     if (error) toast.error(decodeURIComponent(error as string));
   }, [error]);
 
-  const handlePasswordToggle = () => setPasswordVisible(!passwordVisible);
+  // const handlePasswordToggle = () => setPasswordVisible(!passwordVisible);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

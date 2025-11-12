@@ -21,24 +21,26 @@ export function InfiniteScroll<T>({
   const loadMore = useCallback(() => setVisible((v) => v + loadCount), [loadCount]);
 
   useEffect(() => {
-  if (!loaderRef.current) return;
+    const currentLoader = loaderRef.current; // copy ref value
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) {
-        loadMore();
-      }
-    },
-    { rootMargin: "100px" }
-  );
+    if (!currentLoader) return;
 
-  observer.observe(loaderRef.current);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: "100px" }
+    );
 
-  return () => {
-    if (loaderRef.current) observer.unobserve(loaderRef.current);
-    // always return void
-  };
-}, [loadMore]);
+    observer.observe(currentLoader);
+
+    return () => {
+      observer.unobserve(currentLoader); // use the captured variable
+    };
+  }, [loadMore]);
+
 
 
   useEffect(() => {

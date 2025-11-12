@@ -73,7 +73,7 @@ const Signup = () => {
         const el = document.getElementById("g_id_signin");
         if (el) {
           window.google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
             callback: handleGoogleResponse,
           });
           window.google.accounts.id.renderButton(el, {

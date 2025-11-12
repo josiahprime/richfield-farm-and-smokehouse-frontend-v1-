@@ -62,6 +62,12 @@ export interface AuthSlice {
   logoutReason?: "manual" | "auto" | undefined; // optional reason
 }
 
+interface SignupWithGoogleResult {
+  success: boolean;
+  message?: string; // optional if sometimes missing
+}
+
+
 
 
 // 🔹 2. Slice for just actions
@@ -82,7 +88,7 @@ export interface AuthActions {
   setAccessToken: (token: string | null) => void;
   clearAccessToken: () => void;
   refreshAccessToken: () => Promise<string>; // ✅ add this
-  signupWithGoogle: (data: { googleToken: string }) => Promise<void>;
+  signupWithGoogle: (data: { googleToken: string }) => Promise<SignupWithGoogleResult>;
 }
 
 export type AuthStoreWithPersist = AuthState & {
