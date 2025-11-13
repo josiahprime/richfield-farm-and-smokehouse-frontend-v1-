@@ -44,7 +44,7 @@ const SignupMobile = () => {
         });
 
         if (result?.success) {
-          toast.success("Signed in with Google!");
+          // toast.success("Signed in with Google!");
           router.push("/");
         } else {
           toast.error(result?.message || "Google signup failed.");
